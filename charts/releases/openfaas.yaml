@@ -17,4 +17,4 @@ spec:
       alertmanager: prom/alertmanager:v0.15.0-rc.0
       nats: nats-streaming:0.6.0
       queueWorker: functions/queue-worker:0.4.3
-      operator: stefanprodan/faas-o6s:latest-dev
+      operator: functions/faas-o6s:0.4.0
