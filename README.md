@@ -75,3 +75,50 @@ NAME                        READY     STATUS    RESTARTS   AGE
 nodeinfo-58c5bd8998-hxd4g   1/1       Running   0          26s
 nodeinfo-58c5bd8998-v5zw6   1/1       Running   0          26s
 ```
+
+### Sync Helm releases with Weave Flux
+
+OpenFaaS release definition:
+
+```yaml
+apiVersion: helm.integrations.flux.weave.works/v1alpha2
+kind: FluxHelmRelease
+metadata:
+  name: openfaas
+  namespace: openfaas
+  labels:
+    chart: openfaas
+spec:
+  chartGitPath: openfaas
+  releaseName: openfaas
+  values:
+    images:
+      gateway: functions/gateway:0.8.0
+      prometheus: prom/prometheus:v2.2.0
+      alertmanager: prom/alertmanager:v0.15.0-rc.0
+      nats: nats-streaming:0.6.0
+      queueWorker: functions/queue-worker:0.4.3
+      operator: functions/faas-o6s:0.4.0
+```
+
+### Sync OpenFaaS functions with Weave Flux
+
+OpenFaaS function definition:
+
+```yaml
+apiVersion: o6s.io/v1alpha1
+kind: Function
+metadata:
+  name: certinfo
+  namespace: openfaas-fn
+spec:
+  name: certinfo
+  replicas: 1
+  image: stefanprodan/certinfo
+  limits:
+    cpu: "100m"
+    memory: "128Mi"
+  requests:
+    cpu: "10m"
+    memory: "64Mi"
+```
