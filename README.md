@@ -50,6 +50,17 @@ create a **deploy key** with **write access** on your GitHub repository.
 Open GitHub, navigate to your fork, go to _Setting > Deploy keys_ click on _Add deploy key_, check 
 _Allow write access_, paste the Flux public key and click _Add key_.
 
-After a couple of seconds Flux will create the namespaces and will install a Helm release 
-for each resource inside the `releases` dir.
+After a couple of seconds Flux will
+* create the `openfaas` and `openfaas-fn` namespaces 
+* install OpenFaaS Helm release
+* create the OpenFaaS functions
 
+```
+kubectl -n openfaas get deployments
+NAME           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+alertmanager   1         1         1            1           1m
+gateway        1         1         1            1           1m
+nats           1         1         1            1           1m
+prometheus     1         1         1            1           1m
+queue-worker   1         1         1            1           1m
+```
