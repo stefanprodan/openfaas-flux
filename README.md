@@ -55,6 +55,8 @@ After a couple of seconds Flux will
 * install OpenFaaS Helm release
 * create the OpenFaaS functions
 
+Check OpenFaaS services deployment status:
+
 ```
 kubectl -n openfaas get deployments
 NAME           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
@@ -63,4 +65,13 @@ gateway        1         1         1            1           1m
 nats           1         1         1            1           1m
 prometheus     1         1         1            1           1m
 queue-worker   1         1         1            1           1m
+```
+
+Check OpenFaaS functions deployment status:
+
+```
+kubectl -n openfaas-fn get pods
+NAME                        READY     STATUS    RESTARTS   AGE
+nodeinfo-58c5bd8998-hxd4g   1/1       Running   0          26s
+nodeinfo-58c5bd8998-v5zw6   1/1       Running   0          26s
 ```

@@ -1,0 +1,15 @@
+apiVersion: o6s.io/v1alpha1
+kind: Function
+metadata:
+  name: certinfo
+  namespace: openfaas-fn
+spec:
+  name: certinfo
+  replicas: 1
+  image: stefanprodan/certinfo
+  limits:
+    cpu: "100m"
+    memory: "128Mi"
+  requests:
+    cpu: "10m"
+    memory: "64Mi"
