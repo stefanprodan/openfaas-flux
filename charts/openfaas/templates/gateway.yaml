@@ -50,7 +50,7 @@ spec:
         app: gateway
     spec:
       {{- if .Values.operator.create }}
-      serviceAccountName: openfaas-operator
+      serviceAccountName: faas-o6s
       {{- end }}
       containers:
       - name: gateway
