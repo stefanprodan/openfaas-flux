@@ -1,0 +1,20 @@
+---
+apiVersion: helm.integrations.flux.weave.works/v1alpha2
+kind: FluxHelmRelease
+metadata:
+  name: openfaas
+  namespace: openfaas
+  labels:
+    chart: openfaas
+spec:
+  chartGitPath: openfaas
+  releaseName: openfaas
+  values:
+    images:
+      controller: functions/faas-netesd:0.5.1
+      gateway: functions/gateway:0.8.0
+      prometheus: prom/prometheus:v2.2.0
+      alertmanager: prom/alertmanager:v0.15.0-rc.0
+      nats: nats-streaming:0.6.0
+      queueWorker: functions/queue-worker:0.4.3
+      operator: stefanprodan/faas-o6s:latest-dev

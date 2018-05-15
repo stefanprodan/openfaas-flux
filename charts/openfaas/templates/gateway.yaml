@@ -1,0 +1,103 @@
+{{- $functionNs := default .Release.Namespace .Values.functionNamespace }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: {{ template "openfaas.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: faas-controller
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: faas-controller
+  namespace: {{ .Release.Namespace | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "openfaas.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: gateway
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: gateway
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+  selector:
+    app: gateway
+---
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "openfaas.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: gateway
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: gateway
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      {{- if .Values.operator.create }}
+      serviceAccountName: openfaas-operator
+      {{- end }}
+      containers:
+      - name: gateway
+        image: {{ .Values.images.gateway }}
+        imagePullPolicy: Always
+        env:
+        - name: read_timeout
+          value: "{{ .Values.gateway.readTimeout }}"
+        - name: write_timeout
+          value: "{{ .Values.gateway.writeTimeout }}"
+        {{- if .Values.operator.create }}
+        - name: functions_provider_url
+          value: "http://localhost:8081/"
+        {{ else }}
+        - name: functions_provider_url
+          value: "http://faas-netesd.{{ .Release.Namespace }}.svc.cluster.local.:8080/"
+        {{- end }}
+        - name: direct_functions_suffix
+          value: "{{ $functionNs }}.svc.cluster.local."
+        {{- if .Values.async }}
+        - name: faas_nats_address
+          value: "nats.{{ .Release.Namespace }}.svc.cluster.local."
+        - name: faas_nats_port
+          value: "4222"
+        {{- end }}
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      {{- if .Values.operator.create }}
+      - name: operator
+        image: {{ .Values.images.operator }} 
+        imagePullPolicy: Always
+        command:
+          - ./faas-o6s
+          - -logtostderr
+          - -v=2
+        env:
+        - name: function_namespace
+          value: {{ $functionNs | quote }}
+        - name: read_timeout
+          value: "{{ .Values.faasnetesd.readTimeout }}"
+        - name: write_timeout
+          value: "{{ .Values.faasnetesd.writeTimeout }}"
+        - name: image_pull_policy
+          value: {{ .Values.faasnetesd.imagePullPolicy | quote }}
+        ports:
+        - containerPort: 8081
+          protocol: TCP       
+      {{- end }}
+---
