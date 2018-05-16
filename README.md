@@ -160,9 +160,11 @@ nodeinfo   1m
 
 ### Manage Network Policies with Weave Flux
 
-If you use a CNI that supports network policies you can enforce traffic rules for OpenFaaS by placing `NetworkPolicy` 
-definitions inside the `network-policy` dir. The Flux daemon will apply the policies on your cluster along with the 
-namespaces labels.
+If you use a CNI like Weave Net or Calico that supports network policies you can enforce traffic rules for OpenFaaS 
+by placing `NetworkPolicy` definitions inside the `network-policy` dir. 
+The Flux daemon will apply the policies on your cluster along with the namespaces labels.
+
+![NetworkPolicy](docs/screens/network-policy.png)
 
 Deny ingress access to functions except from namespaces with `role: fn-caller` label:
 
@@ -224,3 +226,4 @@ metadata:
   labels:
     access: openfaas
 ```
+
