@@ -11,4 +11,4 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          role: fn-caller
+          role: openfaas-system

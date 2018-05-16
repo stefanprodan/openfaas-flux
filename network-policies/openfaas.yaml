@@ -11,4 +11,4 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          access: openfaas
+          access: openfaas-system

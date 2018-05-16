@@ -161,12 +161,12 @@ nodeinfo   1m
 ### Manage Network Policies with Weave Flux
 
 If you use a CNI like Weave Net or Calico that supports network policies you can enforce traffic rules for OpenFaaS 
-by placing `NetworkPolicy` definitions inside the `network-policy` dir. 
+by placing `NetworkPolicy` definitions inside the `network-policies` dir. 
 The Flux daemon will apply the policies on your cluster along with the namespaces labels.
 
 ![NetworkPolicy](docs/screens/network-policy.png)
 
-Deny ingress access to functions except from namespaces with `role: fn-caller` label:
+Deny ingress access to functions except from namespaces with `role: openfaas-system` label:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -185,7 +185,7 @@ spec:
           role: fn-caller
 ```
 
-Allow OpenFaaS core services to reach the `openfaas-fn` namespace by applying the `role: fn-caller` label:
+Allow OpenFaaS core services to reach the `openfaas-fn` namespace by applying the `role: openfaas-system` label:
 
 ```yaml
 apiVersion: v1
@@ -197,7 +197,7 @@ metadata:
     access: openfaas
 ```
 
-Deny ingress access to OpenFaaS core services except from namespaces with `access: openfaas` label:
+Deny ingress access to OpenFaaS core services except from namespaces with `access: openfaas-system` label:
 
 ```yaml
 kind: NetworkPolicy
@@ -216,7 +216,7 @@ spec:
           access: openfaas
 ```
 
-Allow Weave Cloud to scrape the OpenFaaS Gateway by applying the `access: openfaas` label to `weave` namespace:
+Allow Weave Cloud to scrape the OpenFaaS Gateway by applying the `access: openfaas-system` label to `weave` namespace:
 
 ```yaml
 apiVersion: v1

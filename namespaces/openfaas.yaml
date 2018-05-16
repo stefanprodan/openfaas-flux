@@ -4,5 +4,5 @@ kind: Namespace
 metadata:
   name: openfaas
   labels:
-    role: fn-caller
-    access: openfaas
+    role: openfaas-system
+    access: openfaas-system
