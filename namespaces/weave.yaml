@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: weave
   labels:
-    access: openfaas
+    access: openfaas-system

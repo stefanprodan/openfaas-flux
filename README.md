@@ -193,7 +193,7 @@ kind: Namespace
 metadata:
   name: openfaas
   labels:
-    role: fn-caller
+    role: openfaas-system
     access: openfaas-system
 ```
 
