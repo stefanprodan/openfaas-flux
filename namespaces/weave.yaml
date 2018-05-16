@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: weave
   labels:
-    role: of-caller
+    access: openfaas

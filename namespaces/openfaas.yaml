@@ -5,3 +5,4 @@ metadata:
   name: openfaas
   labels:
     role: fn-caller
+    access: openfaas
