@@ -182,7 +182,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          role: fn-caller
+          role: openfaas-system
 ```
 
 Allow OpenFaaS core services to reach the `openfaas-fn` namespace by applying the `role: openfaas-system` label:
@@ -194,7 +194,7 @@ metadata:
   name: openfaas
   labels:
     role: fn-caller
-    access: openfaas
+    access: openfaas-system
 ```
 
 Deny ingress access to OpenFaaS core services except from namespaces with `access: openfaas-system` label:
@@ -213,7 +213,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          access: openfaas
+          access: openfaas-system
 ```
 
 Allow Weave Cloud to scrape the OpenFaaS Gateway by applying the `access: openfaas-system` label to `weave` namespace:
@@ -224,6 +224,6 @@ kind: Namespace
 metadata:
   name: weave
   labels:
-    access: openfaas
+    access: openfaas-system
 ```
 
