@@ -1,6 +1,9 @@
-# openfaas-flux
+# OpenFaaS GitOps workflow with Weave Flux 
 
-OpenFaaS Cluster state managed by Weave Flux
+This is a step by step guide on setting up a GitOps workflow for OpenFaaS with Weave Flux. 
+GitOps is a way to do Continuous Deliver, it works by using Git as a source of truth for 
+declarative infrastructure and workloads. 
+In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
 
 ### Install Weave Flux 
 
@@ -22,7 +25,7 @@ helm install --name cd \
 sp/weave-flux
 ```
 
-You can connect Weave Flux to Weave Cloud using your service token:
+You can connect Weave Flux to Weave Cloud using a service token:
 
 ```bash
 helm install --name cd \
@@ -75,14 +78,6 @@ NAME               TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
 gateway-external   NodePort   10.27.247.217   <none>        8080:31112/TCP   10h
 ```
 
-Check OpenFaaS functions deployment status:
-
-```
-kubectl -n openfaas-fn get pods
-NAME                        READY     STATUS    RESTARTS   AGE
-nodeinfo-58c5bd8998-hxd4g   1/1       Running   0          26s
-nodeinfo-58c5bd8998-v5zw6   1/1       Running   0          26s
-```
 
 ### Manage Helm releases with Weave Flux
 
@@ -130,7 +125,7 @@ openfaas   1m
 
 An OpenFaaS function is describe through a Kubernetes custom resource named `function`.
 The Flux daemon synchronises these resources from git to the cluster,
-and the OpenFaaS Operator creates the function Kubernetes deployments and ClusterIP services as specified in the resources.
+and the OpenFaaS Operator creates for each function a Kubernetes deployment and a ClusterIP service as specified in the resources.
 
 ![functions](docs/screens/flux-openfaas.png)
 
