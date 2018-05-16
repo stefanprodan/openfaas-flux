@@ -12,6 +12,8 @@ spec:
   values:
     serviceType: NodePort
     rbac: true
+    queueWorker:
+      replicas: 3
     images:
       gateway: functions/gateway:0.8.0
       prometheus: prom/prometheus:v2.2.0

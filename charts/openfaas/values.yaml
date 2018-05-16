@@ -16,6 +16,7 @@ gateway:
 
 queueWorker:
   ackWait : "30s"
+  replicas: 1
 
 operator:
   create: true
