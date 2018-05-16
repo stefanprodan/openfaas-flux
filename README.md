@@ -214,7 +214,7 @@ spec:
           access: openfaas
 ```
 
-Allow Weave Cloud to scrape the OpenFaaS Gateway by applying the `role: fn-caller` to `weave` namespace:
+Allow Weave Cloud to scrape the OpenFaaS Gateway by applying the `access: openfaas` label to `weave` namespace:
 
 ```yaml
 apiVersion: v1
