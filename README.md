@@ -158,6 +158,77 @@ certinfo   1m
 nodeinfo   1m
 ```
 
+### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
+
+On the first Git sync, Flux will deploy the Bitnami Sealed Secrets Controller. 
+Sealed-secrets is a Kubernetes Custom Resource Definition Controller which allows you to store 
+sensitive information in Git.
+
+In order to encrypt secrets you have to install the `kubeseal` CLI:
+
+```bash
+GOOS=$(go env GOOS)
+GOARCH=$(go env GOARCH)
+wget https://github.com/bitnami/sealed-secrets/releases/download/$release/kubeseal-$GOOS-$GOARCH
+sudo install -m 755 kubeseal-$GOOS-$GOARCH /usr/local/bin/kubeseal
+```
+
+Navigate to `./secrets` dir and delete all files inside. 
+Save your public key as `pub-cert.pem`, 
+the public key can be safely stored in Git, you can use it to encrypt secrets offline:
+
+```bash
+kubeseal --controller-namespace=flux --controller-name=sealed-secrets --fetch-cert > secrets/pub-cert.pem
+```
+
+Next let's create a secret with the basic auth credentials for OpenFaaS Gateway. 
+
+First with kubectl generate the basic-auth secret locally:
+
+```bash
+kubectl -n openfaas create secret generic basic-auth \
+--from-literal=user=admin \
+--from-literal=password=admin \
+--dry-run \
+-o json > basic-auth.json
+```
+
+Encrypt the secret with kubeseal and save it in the `secrets` dir:
+
+```bash
+kubeseal --cert=secrets/pub-cert.pem < basic-auth.json > secrets/basic-auth.yaml
+```
+
+This will generate a custom resource of type `SealedSecret` that contains the encrypted credentials:
+
+```yaml
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: basic-auth
+  namespace: openfaas
+spec:
+  encryptedData:
+    password: AgAR5nzhX2TkJ.......
+    user: AgAQDO58WniIV3gTk.......
+``` 
+
+Finally delete the `basic-auth.json` file and commit your changes:
+
+```bash
+rm basic-auth.json
+git add . && git commit -m "Add OpenFaaS basic auth credentials" && git push
+```
+
+The Flux daemon will apply the sealed secret on your cluster, the Sealed Secrets Controller will decrypt it into a 
+Kubernetes secret that's mounted inside the Caddy pod.
+
+Caddy acts as a reverse proxy for the OpenFaaS Gateway, you can access it using the LoadBalancer IP:
+
+```bash
+kubectl -n openfaas get svc caddy-lb
+```
+
 ### Manage Network Policies with Weave Flux
 
 If you use a CNI like Weave Net or Calico that supports network policies you can enforce traffic rules for OpenFaaS 
