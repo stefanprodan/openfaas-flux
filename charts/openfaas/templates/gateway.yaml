@@ -43,7 +43,7 @@ metadata:
   name: gateway
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.gateway.replicas }}
   template:
     metadata:
       labels:

@@ -32,7 +32,7 @@ metadata:
   name: faas-netesd
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.faasnetesd.replicas }}
   template:
     metadata:
       labels:

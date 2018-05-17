@@ -9,10 +9,12 @@ rbac: true
 faasnetesd:
   readTimeout : "20s"
   writeTimeout : "20s"
+  replicas: 1
 
 gateway:
   readTimeout : "20s"
   writeTimeout : "20s"
+  replicas: 1
 
 queueWorker:
   ackWait : "30s"
