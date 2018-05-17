@@ -164,6 +164,8 @@ On the first Git sync, Flux will deploy the Bitnami Sealed Secrets Controller.
 Sealed-secrets is a Kubernetes Custom Resource Definition Controller which allows you to store 
 sensitive information in Git.
 
+![SealedSecrets](docs/screens/flux-secrets.png)
+
 In order to encrypt secrets you have to install the `kubeseal` CLI:
 
 ```bash
