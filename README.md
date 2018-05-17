@@ -169,6 +169,7 @@ sensitive information in Git.
 In order to encrypt secrets you have to install the `kubeseal` CLI:
 
 ```bash
+release=$(curl --silent "https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
 GOOS=$(go env GOOS)
 GOARCH=$(go env GOARCH)
 wget https://github.com/bitnami/sealed-secrets/releases/download/$release/kubeseal-$GOOS-$GOARCH
