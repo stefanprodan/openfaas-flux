@@ -68,6 +68,8 @@ spec:
         - name: functions_provider_url
           value: "http://faas-netesd.{{ .Release.Namespace }}.svc.cluster.local.:8080/"
         {{- end }}
+        - name: direct_functions
+          value: "true"
         - name: direct_functions_suffix
           value: "{{ $functionNs }}.svc.cluster.local."
         {{- if .Values.async }}
