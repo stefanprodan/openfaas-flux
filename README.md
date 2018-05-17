@@ -5,7 +5,7 @@ GitOps is a way to do Continuous Deliver, it works by using Git as a source of t
 declarative infrastructure and workloads. 
 In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
 
-### Install Weave Flux 
+### Install Weave Flux with Helm
 
 Add Weave Flux chart repo:
 
@@ -180,7 +180,10 @@ Save your public key as `pub-cert.pem`,
 the public key can be safely stored in Git, you can use it to encrypt secrets offline:
 
 ```bash
-kubeseal --controller-namespace=flux --controller-name=sealed-secrets --fetch-cert > secrets/pub-cert.pem
+kubeseal --fetch-cert \
+--controller-namespace=flux \
+--controller-name=sealed-secrets \
+> secrets/pub-cert.pem
 ```
 
 Next let's create a secret with the basic auth credentials for OpenFaaS Gateway. 
@@ -228,8 +231,11 @@ Kubernetes secret that's mounted inside the Caddy pod.
 Caddy acts as a reverse proxy for the OpenFaaS Gateway, you can access it using the LoadBalancer IP:
 
 ```bash
-kubectl -n openfaas get svc caddy-lb
+kubectl -n openfaas describe service caddy-lb | grep Ingress | awk '{ print $NF }'
 ```
+
+Wait for an external IP to be allocated and then use it to access the OpenFaaS gateway UI
+with your credentials at `http://<EXTERNAL-IP>`.
 
 ### Manage Network Policies with Weave Flux
 
