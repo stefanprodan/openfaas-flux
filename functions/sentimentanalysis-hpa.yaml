@@ -1,0 +1,22 @@
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentimentanalysis
+  namespace: openfaas-fn
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: sentimentanalysis
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 30
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 400Mi
