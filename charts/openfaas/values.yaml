@@ -23,6 +23,9 @@ queueWorker:
 operator:
   create: true
 
+autoscaling:
+  enabled: true
+
 # images
 images:
   controller: functions/faas-netesd:0.5.1

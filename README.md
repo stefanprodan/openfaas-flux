@@ -65,7 +65,7 @@ kubectl -n flux logs $FLUX_POD | grep identity.pub | cut -d '"' -f2 | sed 's/.\{
 In order to sync your cluster state with git you need to copy the public key and 
 create a **deploy key** with **write access** on your GitHub repository.
 
-Open GitHub, navigate to your fork, go to _Setting > Deploy keys_ click on _Add deploy key_, check 
+Open GitHub and fork this repo, navigate to your fork, go to _Setting > Deploy keys_ click on _Add deploy key_, check 
 _Allow write access_, paste the Flux public key and click _Add key_.
 
 After a couple of seconds Flux
@@ -85,14 +85,14 @@ prometheus     1         1         1            1           1m
 queue-worker   1         1         1            1           1m
 ```
 
-You can access the OpenFaaS Gateway using the NodePort service:
+At this stage the gateway is not exposed outside the cluster. 
+For testing purposes you can access the UI on your local machine at `http://localhost:8080` with port forwarding:
 
-```
-kubectl -n openfaas get svc gateway-external
-NAME               TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-gateway-external   NodePort   10.27.247.217   <none>        8080:31112/TCP   10h
+```bash
+kubectl -n openfaas port-forward deployment/gateway 8080:8080
 ```
 
+Before you expose OpenFaaS on the internet you need to secure the web UI and the OpenFaaS `/system` API.
 
 ### Manage Helm releases with Weave Flux
 
@@ -117,8 +117,10 @@ spec:
   chartGitPath: openfaas
   releaseName: openfaas
   values:
-    serviceType: NodePort
+    exposeServices: false
     rbac: true
+    queueWorker:
+      replicas: 3
     images:
       gateway: functions/gateway:0.8.0
       prometheus: prom/prometheus:v2.2.0
@@ -140,7 +142,8 @@ Flux Helm release fields:
 
 An OpenFaaS function is describe through a Kubernetes custom resource named `function`.
 The Flux daemon synchronises these resources from git to the cluster,
-and the OpenFaaS Operator creates for each function a Kubernetes deployment and a ClusterIP service as specified in the resources.
+and the OpenFaaS Operator creates for each function a Kubernetes deployment and a ClusterIP service as 
+specified in the resources.
 
 ![functions](docs/screens/flux-openfaas.png)
 

@@ -58,6 +58,7 @@ data:
             description: High invocation total on "{{ "{{" }}$labels.instance{{ "}}" }}"
             summary: High invocation total on "{{ "{{" }}$labels.instance{{ "}}" }}"
 ---
+{{- if .Values.autoscaling.enabled }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -96,3 +97,4 @@ data:
         - url: http://gateway.{{ .Release.Namespace }}:8080/system/alert
           send_resolved: true
 ---
+{{- end }}

@@ -10,11 +10,14 @@ spec:
   chartGitPath: openfaas
   releaseName: openfaas
   values:
-    exposeServices: false
-    serviceType: NodePort
-    rbac: true
+    # control the async parallelism the worker replica count
     queueWorker:
       replicas: 3
+    # if you use HPA v2 disable auto-scaling based on req/sec
+    autoscaling:
+      enabled: false
+    exposeServices: false
+    rbac: true
     images:
       gateway: functions/gateway:0.8.0
       prometheus: prom/prometheus:v2.2.0
