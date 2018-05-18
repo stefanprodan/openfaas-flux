@@ -5,6 +5,14 @@ GitOps is a way to do Continuous Deliver, it works by using Git as a source of t
 declarative infrastructure and workloads. 
 In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
 
+OpenFaaS (Functions as a Service) is Serverless Functions Made Simple for Docker and Kubernetes. 
+With OpenFaaS you can package any container or binary as a serverless function - from Node.js to Golang to C# on 
+Linux or Windows. 
+
+Weave Flux is a GitOps Operator for Kubernetes that keeps your cluster state is sync with a Git repository.
+Because Flux is pull based and runs inside Kubernetes you don't have to expose the cluster 
+credentials outside your production environment. 
+
 ### Install Weave Flux with Helm
 
 Add Weave Flux chart repo:
