@@ -128,12 +128,12 @@ spec:
       operator: functions/faas-o6s:0.4.0
 ```
 
-Fields:
+Flux Helm release fields:
 * `metadata.name` is mandatory and needs to follow k8s naming conventions
-* `metadata.namespace` is optional and determines where the release created
+* `metadata.namespace` is optional and determines where the release is created
 * `metadata.labels.chart` is mandatory and should match the directory containing the chart
-* `spec.releaseName` is optional and if not provided the release name will be $namespace-$name
-* `spec.chartGitPath` is the directory containing a chart, given relative to the charts path
+* `spec.releaseName` is optional and if not provided the release name will be `$namespace-$name`
+* `spec.chartGitPath` is the directory containing the chart, given relative to the charts path
 * `spec.values` are user customizations of default parameter values from the chart itself
 
 ### Manage OpenFaaS functions with Weave Flux

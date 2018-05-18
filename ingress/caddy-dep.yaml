@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: caddy
   namespace: openfaas
+  annotations:
+    flux.weave.works/ignore: "true"
 spec:
   replicas: 1
   selector:

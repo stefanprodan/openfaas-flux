@@ -5,6 +5,7 @@ metadata:
   name: caddy-lb
   namespace: openfaas
   annotations:
+    flux.weave.works/ignore: "true"
     prometheus.io.scrape: 'false'
   labels:
     app: caddy

@@ -6,6 +6,8 @@ metadata:
   namespace: openfaas
   labels:
     app: caddy
+  annotations:
+    flux.weave.works/ignore: "true"
 data:
   Caddyfile: |
     :80 {
