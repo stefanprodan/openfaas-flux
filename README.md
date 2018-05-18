@@ -78,11 +78,10 @@ Check OpenFaaS services deployment status:
 ```
 kubectl -n openfaas get deployments
 NAME           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-alertmanager   1         1         1            1           1m
-gateway        1         1         1            1           1m
-nats           1         1         1            1           1m
-prometheus     1         1         1            1           1m
-queue-worker   1         1         1            1           1m
+gateway        1         1         1            1           49s
+nats           1         1         1            1           49s
+prometheus     1         1         1            1           49s
+queue-worker   3         3         3            3           49s
 ```
 
 At this stage the gateway is not exposed outside the cluster. 
@@ -121,6 +120,8 @@ spec:
     rbac: true
     queueWorker:
       replicas: 3
+    autoscaling:
+      enabled: false
     images:
       gateway: functions/gateway:0.8.0
       prometheus: prom/prometheus:v2.2.0

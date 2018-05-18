@@ -1,0 +1,14 @@
+apiVersion: o6s.io/v1alpha1
+kind: Function
+metadata:
+  name: sentimentanalysis
+  namespace: openfaas-fn
+spec:
+  name: sentimentanalysis
+  image: functions/sentimentanalysis
+  limits:
+    cpu: "2000m"
+    memory: "512Mi"
+  requests:
+    cpu: "10m"
+    memory: "64Mi"
