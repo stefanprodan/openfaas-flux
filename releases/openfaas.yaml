@@ -10,6 +10,7 @@ spec:
   chartGitPath: openfaas
   releaseName: openfaas
   values:
+    exposeServices: false
     serviceType: NodePort
     rbac: true
     queueWorker:
