@@ -12,6 +12,13 @@ Linux or Windows.
 Weave Flux is a GitOps Operator for Kubernetes that keeps your cluster state is sync with a Git repository.
 Because Flux is pull based and runs inside Kubernetes you don't have to expose the cluster 
 credentials outside your production environment. 
+Once you enable Flux on your cluster any changes in your production environment are done via pull request with 
+rollback and audit logs provided by Git. 
+
+You can define the desire state of your cluster with Helm charts, Kubernetes deployments, network policies and 
+even custom resources like OpenFaaS functions or sealed secrets. Weave Flux implements a control loop that continuously 
+applies the desired state on your cluster offering protection against harmful actions like deployments deletion or 
+network policies altering. 
 
 ### Install Weave Flux with Helm
 
