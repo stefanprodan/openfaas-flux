@@ -192,9 +192,12 @@ Next let's create a secret with the basic auth credentials for OpenFaaS Gateway.
 First with kubectl generate the basic-auth secret locally:
 
 ```bash
+password=$(head -c 12 /dev/random | shasum| cut -d' ' -f1)
+echo $password
+
 kubectl -n openfaas create secret generic basic-auth \
 --from-literal=user=admin \
---from-literal=password=admin \
+--from-literal=password=$password \
 --dry-run \
 -o json > basic-auth.json
 ```
@@ -232,11 +235,16 @@ Kubernetes secret that's mounted inside the Caddy pod.
 Caddy acts as a reverse proxy for the OpenFaaS Gateway, you can access it using the LoadBalancer IP:
 
 ```bash
-kubectl -n openfaas describe service caddy-lb | grep Ingress | awk '{ print $NF }'
+openfaas-ip=$(kubectl -n openfaas describe service caddy-lb | grep Ingress | awk '{ print $NF }')
 ```
 
-Wait for an external IP to be allocated and then use it to access the OpenFaaS gateway UI
-with your credentials at `http://<EXTERNAL-IP>`.
+Wait for an external IP to be allocated and then use it to access the OpenFaaS Gateway UI
+with your credentials at `http://$openfaas-ip`.
+
+Next you can enable TLS with LE by editing the Caddy [config](ingress/caddy-cfg.yaml) file.
+
+If you run Kubernetes on-prem or on bare-metal you should change the Caddy service from LoadBalancer to 
+NodePort to expose OpenFaaS on the internet.
 
 ### Manage Network Policies with Weave Flux
 
