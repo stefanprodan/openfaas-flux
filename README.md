@@ -181,7 +181,7 @@ spec:
     apiVersion: apps/v1beta2
     kind: Deployment
     name: sentimentanalysis
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 10
   metrics:
   - type: Resource
