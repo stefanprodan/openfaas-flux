@@ -58,8 +58,7 @@ At startup Flux generates a SSH key and logs the public key.
 Find the SSH public key with:
 
 ```bash
-export FLUX_POD=$(kubectl get pods --namespace flux -l "app=weave-flux,release=cd" -o jsonpath="{.items[0].metadata.name}")
-kubectl -n flux logs $FLUX_POD | grep identity.pub | cut -d '"' -f2 | sed 's/.\{2\}$//'
+kubectl -n flux logs deployment/cd-weave-flux | grep identity.pub | cut -d '"' -f2 | sed 's/.\{2\}$//'
 ```
 
 In order to sync your cluster state with git you need to copy the public key and 
@@ -139,7 +138,7 @@ Flux Helm release fields:
 * `spec.chartGitPath` is the directory containing the chart, given relative to the charts path
 * `spec.values` are user customizations of default parameter values from the chart itself
 
-### Manage OpenFaaS functions with Weave Flux
+### Manage OpenFaaS functions and auto-scaling with Weave Flux
 
 An OpenFaaS function is describe through a Kubernetes custom resource named `function`.
 The Flux daemon synchronises these resources from git to the cluster,
@@ -154,27 +153,45 @@ OpenFaaS function definition:
 apiVersion: o6s.io/v1alpha1
 kind: Function
 metadata:
-  name: certinfo
+  name: sentimentanalysis
   namespace: openfaas-fn
 spec:
-  name: certinfo
-  replicas: 1
-  image: stefanprodan/certinfo
+  name: sentimentanalysis
+  image: functions/sentimentanalysis
   limits:
-    cpu: "100m"
-    memory: "128Mi"
+    cpu: "2000m"
+    memory: "512Mi"
   requests:
     cpu: "10m"
     memory: "64Mi"
 ```
 
-You can use kubectl to list OpenFaaS functions:
+Since sentiment analysis is a ML function you would probably want to auto-scale it based on resource usage. 
+You can use Kubernetes  horizontal pod autoscaler to automatically scale a function based on average CPU usage and 
+memory consumption. 
 
-```
-kubectl -n openfaas-fn get functions
-NAME       AGE
-certinfo   1m
-nodeinfo   1m
+```yaml
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentimentanalysis
+  namespace: openfaas-fn
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: sentimentanalysis
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 400Mi
 ```
 
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
