@@ -86,7 +86,7 @@ spec:
         image: {{ .Values.images.operator }} 
         imagePullPolicy: Always
         command:
-          - ./faas-o6s
+          - ./openfaas-operator
           - -logtostderr
           - -v=2
         env:
