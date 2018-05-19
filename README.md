@@ -194,6 +194,26 @@ spec:
       targetAverageValue: 400Mi
 ```
 
+Let's run a load test to validate that HPA works as expected: 
+
+```bash
+go get -u github.com/rakyll/hey
+hey -n 100000 -c 10 -q 1 -d "$(cat README.md)" http://localhost:8080/function/sentimentanalysis
+``` 
+
+Monitor the autoscaler with:
+
+```bash
+kubectl -n openfaas-fn describe hpa
+
+Events:
+  Type    Reason             Age   From                       Message
+  ----    ------             ----  ----                       -------
+  Normal  SuccessfulRescale  12m   horizontal-pod-autoscaler  New size: 1; reason: All metrics below target
+  Normal  SuccessfulRescale  4m    horizontal-pod-autoscaler  New size: 4; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  1m    horizontal-pod-autoscaler  New size: 8; reason: cpu resource utilization (percentage of request) above target
+```
+
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
 On the first Git sync, Flux will deploy the Bitnami Sealed Secrets Controller. 
