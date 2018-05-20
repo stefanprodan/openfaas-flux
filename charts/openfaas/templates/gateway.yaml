@@ -52,6 +52,11 @@ spec:
       {{- if .Values.operator.create }}
       serviceAccountName: faas-o6s
       {{- end }}
+      {{- if .Values.securityContext.create }}
+      securityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+      {{- end }}
       containers:
       - name: gateway
         image: {{ .Values.images.gateway }}

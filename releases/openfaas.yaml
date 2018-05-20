@@ -18,6 +18,9 @@ spec:
       enabled: false
     exposeServices: false
     rbac: true
+    # set read-only fs for system services and run as non root
+    securityContext:
+      create: true
     images:
       gateway: functions/gateway:0.8.0
       prometheus: prom/prometheus:v2.2.0
