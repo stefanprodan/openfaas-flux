@@ -52,11 +52,9 @@ spec:
       {{- if .Values.operator.create }}
       serviceAccountName: faas-o6s
       {{- end }}
-      {{- if .Values.securityContext.create }}
       securityContext:
         readOnlyRootFilesystem: true
-        runAsUser: 2000
-      {{- end }}
+        runAsUser: 10001
       containers:
       - name: gateway
         image: {{ .Values.images.gateway }}

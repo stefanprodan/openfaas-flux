@@ -17,6 +17,9 @@ spec:
       labels:
         app: queue-worker
     spec:
+      securityContext:
+        readOnlyRootFilesystem: true
+        runAsUser: 10001
       containers:
       - name:  queue-worker
         image: {{ .Values.images.queueWorker }}

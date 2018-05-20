@@ -26,9 +26,6 @@ operator:
 autoscaling:
   enabled: true
 
-securityContext:
-  create: true
-
 # images
 images:
   controller: functions/faas-netesd:0.5.1
