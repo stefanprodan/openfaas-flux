@@ -59,6 +59,14 @@ spec:
       - name: gateway
         image: {{ .Values.images.gateway }}
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
         env:
         - name: read_timeout
           value: "{{ .Values.gateway.readTimeout }}"
