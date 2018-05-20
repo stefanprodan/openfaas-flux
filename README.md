@@ -290,7 +290,7 @@ kubectl -n openfaas create secret generic basic-auth \
 Encrypt the secret with kubeseal and save it in the `secrets` dir:
 
 ```bash
-kubeseal --cert=secrets/pub-cert.pem < basic-auth.json > secrets/basic-auth.yaml
+kubeseal --format=yaml --cert=secrets/pub-cert.pem < basic-auth.json > secrets/basic-auth.yaml
 ```
 
 This will generate a custom resource of type `SealedSecret` that contains the encrypted credentials:
