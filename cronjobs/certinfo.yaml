@@ -1,0 +1,19 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: certinfo
+  namespace: openfaas
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: faas-cli
+            image: openfaas/faas-cli:0.6.9
+            args:
+            - /bin/sh
+            - -c
+            - echo "stefanprodan.com" | ./faas-cli invoke certinfo -g http://gateway:8080
+          restartPolicy: OnFailure
