@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: nodeinfo-cron
+  name: nodeinfo
   namespace: openfaas
 spec:
   schedule: "*/1 * * * *"

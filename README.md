@@ -214,6 +214,35 @@ Events:
   Normal  SuccessfulRescale  1m    horizontal-pod-autoscaler  New size: 8; reason: cpu resource utilization (percentage of request) above target
 ```
 
+Running functions on a schedule can be done with Kubernetes ConJobs and the OpenFaaS CLI:
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: nodeinfo
+  namespace: openfaas
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: faas-cli
+            image: openfaas/faas-cli:0.6.9
+            args:
+            - /bin/sh
+            - -c
+            - echo "verbose" | ./faas-cli invoke nodeinfo -g http://gateway:8080
+          restartPolicy: OnFailure
+```
+
+The above cron job will call the `nodeinfo` function every minute using the `verbose` payload.
+
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
 On the first Git sync, Flux will deploy the Bitnami Sealed Secrets Controller. 
