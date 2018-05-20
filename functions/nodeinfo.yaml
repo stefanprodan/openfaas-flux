@@ -5,12 +5,11 @@ metadata:
   namespace: openfaas-fn
 spec:
   name: nodeinfo
-  replicas: 2
   handler: node main.js
   image: functions/nodeinfo
   labels:
     com.openfaas.scale.min: "2"
-    com.openfaas.scale.max: "8"
+    com.openfaas.scale.max: "2"
   environment:
     output: "verbose"
     debug: "true"
