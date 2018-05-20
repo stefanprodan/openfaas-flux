@@ -13,4 +13,5 @@ spec:
     cpu: "10m"
     memory: "64Mi"
   secrets:
+    # mounted at /run/secrets/openfaas-token
     - openfaas-token
