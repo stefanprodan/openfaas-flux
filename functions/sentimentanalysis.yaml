@@ -6,6 +6,8 @@ metadata:
 spec:
   name: sentimentanalysis
   image: functions/sentimentanalysis
+  environment:
+    output: "verbose"
   limits:
     cpu: "2000m"
     memory: "512Mi"

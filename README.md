@@ -158,6 +158,8 @@ metadata:
 spec:
   name: sentimentanalysis
   image: functions/sentimentanalysis
+  environment:
+    output: "verbose"
   limits:
     cpu: "2000m"
     memory: "512Mi"
@@ -321,8 +323,8 @@ Kubernetes secret.
 
 Inside the [ingress](ingress) dir you can find a deployment definition for Caddy.
 Caddy acts as a reverse proxy for the OpenFaaS Gateway and uses the `basic-auth` secret to protect the 
-Gateway system API and UI. In order to deploy Caddy edit all manifest in the ingress dir and set the 
-`flux.weave.works/ignore` to `false`.
+Gateway system API and UI. In order to deploy Caddy edit all manifest in the ingress dir and delete the 
+`flux.weave.works/ignore` annotation.
 
 ```yaml
 apiVersion: v1
@@ -330,8 +332,6 @@ kind: Service
 metadata:
   name: caddy-lb
   namespace: openfaas
-  annotations:
-    flux.weave.works/ignore: "false"
   labels:
     app: caddy
 spec:
