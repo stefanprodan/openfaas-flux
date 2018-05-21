@@ -222,7 +222,7 @@ Running functions on a schedule can be done with Kubernetes ConJobs and the Open
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: nodeinfo
+  name: cron-nodeinfo
   namespace: openfaas
 spec:
   schedule: "*/1 * * * *"
@@ -243,7 +243,7 @@ spec:
           restartPolicy: OnFailure
 ```
 
-The above cron job will call the `nodeinfo` function every minute using the `verbose` payload.
+The above cron job will call the `nodeinfo` function every minute using `verbose` as payload.
 
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
@@ -439,4 +439,27 @@ metadata:
   labels:
     access: openfaas-system
 ```
+
+### Disaster Recovery 
+
+In order to recover from a major disaster like a cluster wipe out all you need to to is create a new Kubernetes cluster, 
+deploy Flux with Helm and update the SSH public key in the GitHub repo. 
+Weave Flux will restore all workloads on the new cluster, the only manifests that will fail to apply will be the sealed 
+secrets since the private key used for decryption has changed. 
+
+To prepare for disaster recovery you should backup the SealedSecrets private key with:
+
+```bash
+kubectl get secret -n flux sealed-secrets-key -o yaml > sealed-secrets-key.yaml
+```
+
+To restore from backup after a disaster replace the newly-created secret and restart the sealed-secrets controller:
+
+```bash
+kubectl replace secret -n flux sealed-secrets-key sealed-secrets-key.yaml
+kubectl delete pod -n flux -l app=sealed-secrets-controller
+```
+
+Once the correct private key is in place, the sealed-secrets controller will create the Kubernetes secrets and your 
+OpenFaaS cluster will be fully restored.
 
