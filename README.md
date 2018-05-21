@@ -218,6 +218,8 @@ Events:
 
 Running functions on a schedule can be done with Kubernetes ConJobs and the OpenFaaS CLI:
 
+![cronjob](docs/screens/openfaas-scope.png)
+
 ```yaml
 apiVersion: batch/v1beta1
 kind: CronJob
