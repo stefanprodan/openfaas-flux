@@ -264,8 +264,14 @@ sudo install -m 755 kubeseal-$GOOS-$GOARCH /usr/local/bin/kubeseal
 ```
 
 Navigate to `./secrets` dir and delete all files inside. 
-Save your public key as `pub-cert.pem`, 
-the public key can be safely stored in Git, you can use it to encrypt secrets offline:
+
+```bash
+rm -rf secrets && mkdir secrets
+```
+
+At startup Sealed Secrets Controller generates a RSA key and logs the public key. 
+Using `kubeseal` you can save your public key as `pub-cert.pem`, 
+the public key can be safely stored in Git, you can use it to encrypt secrets **offline**:
 
 ```bash
 kubeseal --fetch-cert \
