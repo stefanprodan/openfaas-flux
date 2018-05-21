@@ -216,9 +216,11 @@ Events:
   Normal  SuccessfulRescale  1m    horizontal-pod-autoscaler  New size: 8; reason: cpu resource utilization (percentage of request) above target
 ```
 
+### Manage OpenFaaS cron jobs
+
 Running functions on a schedule can be done with Kubernetes ConJobs and the OpenFaaS CLI:
 
-![cronjob](docs/screens/openfaas-scope.png)
+![cronjob](docs/screens/scope-of.png)
 
 ```yaml
 apiVersion: batch/v1beta1
