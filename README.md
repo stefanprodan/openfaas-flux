@@ -1,7 +1,7 @@
 # OpenFaaS GitOps workflow with Weave Flux 
 
-This is a step by step guide on setting up a GitOps workflow for OpenFaaS with Weave Flux. 
-GitOps is a way to do Continuous Deliver, it works by using Git as a source of truth for 
+This is a step by step guide on how to set up a GitOps workflow for OpenFaaS with Weave Flux. 
+GitOps is a way to do Continuous Delivery, it works by using Git as a source of truth for 
 declarative infrastructure and workloads. 
 In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
 
@@ -10,19 +10,17 @@ With OpenFaaS you can package any container or binary as a serverless function -
 Linux or Windows. 
 
 Weave Flux is a GitOps Operator for Kubernetes that keeps your cluster state is sync with a Git repository.
-Because Flux is pull based and runs inside Kubernetes you don't have to expose the cluster 
-credentials outside your production environment. 
-Once you enable Flux on your cluster any changes in your production environment are done via pull request with 
-rollback and audit logs provided by Git. 
+Because Flux is pull based and also runs inside Kubernetes, you don't have to expose the cluster 
+credentials outside your production environment. Once you enable Flux on your cluster any changes in your production environment are done via pull request with rollback and audit logs provided by Git. 
 
-You can define the desire state of your cluster with Helm charts, Kubernetes deployments, network policies and 
+You can define the desired state of your cluster with Helm charts, Kubernetes deployments, network policies and 
 even custom resources like OpenFaaS functions or sealed secrets. Weave Flux implements a control loop that continuously 
-applies the desired state on your cluster offering protection against harmful actions like deployments deletion or 
+applies the desired state to your cluster, offering protection against harmful actions like deployments deletion or 
 network policies altering. 
 
 ### Install Weave Flux with Helm
 
-Add Weave Flux chart repo:
+Add the Weave Flux chart repo:
 
 ```bash
 helm repo add sp https://stefanprodan.github.io/k8s-podinfo
@@ -54,7 +52,7 @@ sp/weave-flux
 
 ### Setup Git sync
 
-At startup Flux generates a SSH key and logs the public key. 
+At startup, Flux generates a SSH key and logs the public key. 
 Find the SSH public key with:
 
 ```bash
@@ -64,15 +62,16 @@ kubectl -n flux logs deployment/weave-flux | grep identity.pub | cut -d '"' -f2 
 In order to sync your cluster state with git you need to copy the public key and 
 create a **deploy key** with **write access** on your GitHub repository.
 
-Open GitHub and fork this repo, navigate to your fork, go to _Setting > Deploy keys_ click on _Add deploy key_, check 
+Open GitHub and fork this repo, navigate to your fork, go to _Settings > Deploy keys_ click on _Add deploy key_, check 
 _Allow write access_, paste the Flux public key and click _Add key_.
 
-After a couple of seconds Flux
+After a couple of seconds Flux: 
+
 * creates the `openfaas` and `openfaas-fn` namespaces
 * installs OpenFaaS Helm release
 * creates the OpenFaaS functions
 
-Check OpenFaaS services deployment status:
+Check the OpenFaaS services deployment status:
 
 ```
 kubectl -n openfaas get deployments
@@ -94,9 +93,9 @@ Before you expose OpenFaaS on the internet you need to secure the web UI and the
 
 ### Manage Helm releases with Weave Flux
 
-The Flux Helm operator provides an extension to Weave Flux to be able to automate Helm Chart releases.
+The Flux Helm operator provides an extension to Weave Flux that automates Helm Chart releases for it.
 A Chart release is described through a Kubernetes custom resource named `FluxHelmRelease`.
-The Flux daemon synchronises these resources from git to the cluster,
+The Flux daemon synchronizes these resources from git to the cluster,
 and the Flux Helm operator makes sure Helm charts are released as specified in the resources.
 
 ![helm](docs/screens/flux-helm.png)
@@ -140,8 +139,8 @@ Flux Helm release fields:
 
 ### Manage OpenFaaS functions and auto-scaling with Weave Flux
 
-An OpenFaaS function is describe through a Kubernetes custom resource named `function`.
-The Flux daemon synchronises these resources from git to the cluster,
+An OpenFaaS function is described through a Kubernetes custom resource named `function`.
+The Flux daemon synchronizes these resources from git to the cluster,
 and the OpenFaaS Operator creates for each function a Kubernetes deployment and a ClusterIP service as 
 specified in the resources.
 
@@ -168,8 +167,8 @@ spec:
     memory: "64Mi"
 ```
 
-Since sentiment analysis is a ML function you would probably want to auto-scale it based on resource usage. 
-You can use Kubernetes  horizontal pod autoscaler to automatically scale a function based on average CPU usage and 
+Since sentiment analysis is a ML function you will probably want to auto-scale it based on resource usage. 
+You can use the Kubernetes horizontal pod autoscaler to automatically scale a function based on the average CPU usage and 
 memory consumption. 
 
 ```yaml
@@ -247,12 +246,12 @@ spec:
           restartPolicy: OnFailure
 ```
 
-The above cron job will call the `nodeinfo` function every minute using `verbose` as payload.
+The above cron job calls the `nodeinfo` function every minute using `verbose` as payload.
 
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
-On the first Git sync, Flux will deploy the Bitnami Sealed Secrets Controller. 
-Sealed-secrets is a Kubernetes Custom Resource Definition Controller which allows you to store 
+On the first Git sync, Flux deploys the Bitnami Sealed Secrets Controller. 
+Sealed-secrets is a Kubernetes Custom Resource Definition Controller that allows you to store 
 sensitive information in Git.
 
 ![SealedSecrets](docs/screens/flux-secrets.png)
@@ -273,9 +272,9 @@ Navigate to `./secrets` dir and delete all files inside.
 rm -rf secrets && mkdir secrets
 ```
 
-At startup Sealed Secrets Controller generates a RSA key and logs the public key. 
+At startup, the Sealed Secrets Controller generates a RSA key and logs the public key. 
 Using `kubeseal` you can save your public key as `pub-cert.pem`, 
-the public key can be safely stored in Git, you can use it to encrypt secrets **offline**:
+the public key can be safely stored in Git, and you can use it to encrypt secrets **offline**:
 
 ```bash
 kubeseal --fetch-cert \
@@ -284,9 +283,9 @@ kubeseal --fetch-cert \
 > secrets/pub-cert.pem
 ```
 
-Next let's create a secret with the basic auth credentials for OpenFaaS Gateway. 
+Next let's create a secret with the basic auth credentials for the OpenFaaS Gateway. 
 
-First with kubectl generate the basic-auth secret locally:
+Use `kubectl` to locally generate the basic-auth secret:
 
 ```bash
 password=$(head -c 12 /dev/random | shasum| cut -d' ' -f1)
@@ -299,13 +298,13 @@ kubectl -n openfaas create secret generic basic-auth \
 -o json > basic-auth.json
 ```
 
-Encrypt the secret with kubeseal and save it in the `secrets` dir:
+Encrypt the secret with `kubeseal` and save it in the `secrets` dir:
 
 ```bash
 kubeseal --format=yaml --cert=secrets/pub-cert.pem < basic-auth.json > secrets/basic-auth.yaml
 ```
 
-This will generate a custom resource of type `SealedSecret` that contains the encrypted credentials:
+This generates a custom resource of type `SealedSecret` that contains the encrypted credentials:
 
 ```yaml
 apiVersion: bitnami.com/v1alpha1
@@ -326,14 +325,14 @@ rm basic-auth.json
 git add . && git commit -m "Add OpenFaaS basic auth credentials" && git push
 ```
 
-The Flux daemon will apply the sealed secret on your cluster, the Sealed Secrets Controller will decrypt it into a 
+The Flux daemon applies the sealed secret on your cluster. The Sealed Secrets Controller will then decrypt it into a 
 Kubernetes secret.
 
 ### Expose OpenFaaS Gateway outside the cluster
 
 Inside the [ingress](ingress) dir you can find a deployment definition for Caddy.
 Caddy acts as a reverse proxy for the OpenFaaS Gateway and uses the `basic-auth` secret to protect the 
-Gateway system API and UI. In order to deploy Caddy edit all manifest in the ingress dir and delete the 
+Gateway system API and UI. In order to deploy Caddy edit all manifests in the ingress dir and then delete the 
 `flux.weave.works/ignore` annotation.
 
 ```yaml
@@ -360,7 +359,7 @@ Commit your changes:
 git add . && git commit -m "Enable OpenFaaS Caddy" && git push
 ```
 
-You can access OpenFaaS Gateway using the LoadBalancer pubic IP 
+You can access the OpenFaaS Gateway using the LoadBalancer pubic IP 
 (depending on your cloud provider this can take several minutes):
 
 ```bash
@@ -370,15 +369,15 @@ openfaas-ip=$(kubectl -n openfaas describe service caddy-lb | grep Ingress | awk
 Wait for an external IP to be allocated and then use it to access the OpenFaaS Gateway UI
 with your credentials at `http://$openfaas-ip`.
 
-Next you can enable TLS with LE by editing the Caddy [config](ingress/caddy-cfg.yaml) file.
+Next enable TLS with LE by editing the Caddy [config](ingress/caddy-cfg.yaml) file.
 
-If you run Kubernetes on-prem or on bare-metal you should change the Caddy service from LoadBalancer to 
+If you run Kubernetes on-prem or on bare-metal, you should change the Caddy service from LoadBalancer to 
 NodePort to expose OpenFaaS on the internet.
 
 ### Manage Network Policies with Weave Flux
 
 If you use a CNI like Weave Net or Calico that supports network policies you can enforce traffic rules for OpenFaaS 
-by placing `NetworkPolicy` definitions inside the `network-policies` dir. 
+by placing the `NetworkPolicy` definitions inside the `network-policies` dir. 
 The Flux daemon will apply the policies on your cluster along with the namespaces labels.
 
 ![NetworkPolicy](docs/screens/network-policy.png)
@@ -446,10 +445,10 @@ metadata:
 
 ### Disaster Recovery 
 
-In order to recover from a major disaster like a cluster wipe out all you need to to is create a new Kubernetes cluster, 
+In order to recover from a major disaster like a cluster melt down, all you need to to is create a new Kubernetes cluster, 
 deploy Flux with Helm and update the SSH public key in the GitHub repo. 
 Weave Flux will restore all workloads on the new cluster, the only manifests that will fail to apply will be the sealed 
-secrets since the private key used for decryption has changed. 
+secrets since the private key used for decryption will have changed. 
 
 To prepare for disaster recovery you should backup the SealedSecrets private key with:
 
@@ -457,7 +456,7 @@ To prepare for disaster recovery you should backup the SealedSecrets private key
 kubectl get secret -n flux sealed-secrets-key -o yaml --export > sealed-secrets-key.yaml
 ```
 
-To restore from backup after a disaster replace the newly-created secret and restart the sealed-secrets controller:
+To restore from backup after a disaster, replace the newly-created secret and restart the sealed-secrets controller:
 
 ```bash
 kubectl replace secret -n flux sealed-secrets-key sealed-secrets-key.yaml
