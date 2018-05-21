@@ -32,7 +32,7 @@ Install Weave Flux and its Helm Operator by specifying your fork URL
 (replace `stefanprodan` with your GitHub username): 
 
 ```bash
-helm install --name cd \
+helm install --name weave-flux \
 --set helmOperator.create=true \
 --set git.url=git@github.com:stefanprodan/openfaas-flux \
 --set git.chartsPath=charts \
@@ -43,7 +43,7 @@ sp/weave-flux
 You can connect Weave Flux to Weave Cloud using a service token:
 
 ```bash
-helm install --name cd \
+helm install --name weave-flux \
 --set token=YOUR_WEAVE_CLOUD_SERVICE_TOKEN \
 --set helmOperator.create=true \
 --set git.url=git@github.com:stefanprodan/openfaas-flux \
@@ -58,7 +58,7 @@ At startup Flux generates a SSH key and logs the public key.
 Find the SSH public key with:
 
 ```bash
-kubectl -n flux logs deployment/cd-weave-flux | grep identity.pub | cut -d '"' -f2 | sed 's/.\{2\}$//'
+kubectl -n flux logs deployment/weave-flux | grep identity.pub | cut -d '"' -f2 | sed 's/.\{2\}$//'
 ```
 
 In order to sync your cluster state with git you need to copy the public key and 
@@ -450,14 +450,14 @@ secrets since the private key used for decryption has changed.
 To prepare for disaster recovery you should backup the SealedSecrets private key with:
 
 ```bash
-kubectl get secret -n flux sealed-secrets-key -o yaml > sealed-secrets-key.yaml
+kubectl get secret -n flux sealed-secrets-key -o yaml --export > sealed-secrets-key.yaml
 ```
 
 To restore from backup after a disaster replace the newly-created secret and restart the sealed-secrets controller:
 
 ```bash
 kubectl replace secret -n flux sealed-secrets-key sealed-secrets-key.yaml
-kubectl delete pod -n flux -l app=sealed-secrets-controller
+kubectl delete pod -n flux -l app=sealed-secrets
 ```
 
 Once the correct private key is in place, the sealed-secrets controller will create the Kubernetes secrets and your 
