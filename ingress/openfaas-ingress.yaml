@@ -6,9 +6,6 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "contour"
 spec:
-  rules:
-    http:
-      paths:
-      - backend:
-          serviceName: gateway
-          servicePort: 8080
+  backend:
+    serviceName: gateway
+    servicePort: 8080
