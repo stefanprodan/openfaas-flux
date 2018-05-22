@@ -28,3 +28,12 @@ spec:
       nats: nats-streaming:0.6.0
       queueWorker: functions/queue-worker:0.4.3
       operator: functions/openfaas-operator:0.6.0
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "contour"
+      hosts:
+        - host: openfaas.weavedx.com
+          serviceName: gateway
+          servicePort: 8080
+          path: /
