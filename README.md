@@ -122,7 +122,7 @@ spec:
     autoscaling:
       enabled: false
     images:
-      gateway: functions/gateway:0.8.0
+      gateway: stefanprodan/gateway:auth-0.8
       prometheus: prom/prometheus:v2.2.0
       alertmanager: prom/alertmanager:v0.15.0-rc.1
       nats: nats-streaming:0.6.0
@@ -293,8 +293,8 @@ password=$(head -c 12 /dev/random | shasum| cut -d' ' -f1)
 echo $password
 
 kubectl -n openfaas create secret generic basic-auth \
---from-literal=user=admin \
---from-literal=password=$password \
+--from-literal=basic_auth_user=admin \
+--from-literal=basic_auth_password=$password \
 --dry-run \
 -o json > basic-auth.json
 ```

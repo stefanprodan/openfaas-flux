@@ -1,2 +1,5 @@
 # ignore sealed-secrets master key
 sealed-secrets-key.yaml
+
+# ignore OpenFaaS basic-auth secret
+basic-auth.json

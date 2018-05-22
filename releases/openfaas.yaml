@@ -18,8 +18,10 @@ spec:
       enabled: false
     exposeServices: false
     rbac: true
+    basic_auth:
+      enabled: true
     images:
-      gateway: functions/gateway:0.8.1
+      gateway: stefanprodan/gateway:auth-0.8
       prometheus: prom/prometheus:v2.2.0
       alertmanager: prom/alertmanager:v0.15.0-rc.1
       nats: nats-streaming:0.6.0

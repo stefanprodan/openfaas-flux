@@ -49,6 +49,12 @@ spec:
       labels:
         app: gateway
     spec:
+      {{- if .Values.basic_auth.enabled }}
+      volumes:
+      - name: auth
+        secret:
+          secretName: basic-auth
+      {{- end }}
       {{- if .Values.operator.create }}
       serviceAccountName: faas-o6s
       {{- end }}
@@ -89,9 +95,19 @@ spec:
         - name: faas_nats_port
           value: "4222"
         {{- end }}
+        {{- if .Values.basic_auth.enabled }}
+        - name: basic_auth
+          value: "true"
+        {{- end }}
         ports:
         - containerPort: 8080
           protocol: TCP
+        {{- if .Values.basic_auth.enabled }}
+        volumeMounts:
+        - name: auth
+          readOnly: true
+          mountPath: "/etc/secrets"
+        {{- end }}
       {{- if .Values.operator.create }}
       - name: operator
         image: {{ .Values.images.operator }} 

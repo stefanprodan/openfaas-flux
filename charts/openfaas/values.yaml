@@ -26,6 +26,9 @@ operator:
 autoscaling:
   enabled: true
 
+basic_auth:
+  enabled: true
+
 # images
 images:
   controller: functions/faas-netesd:0.5.1
