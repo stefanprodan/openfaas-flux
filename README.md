@@ -76,20 +76,14 @@ Check the OpenFaaS services deployment status:
 ```
 kubectl -n openfaas get deployments
 NAME           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-gateway        1         1         1            1           49s
+gateway        1         0         0            0           49s
 nats           1         1         1            1           49s
 prometheus     1         1         1            1           49s
 queue-worker   3         3         3            3           49s
 ```
 
-At this stage the gateway is not exposed outside the cluster. 
-For testing purposes you can access the UI on your local machine at `http://localhost:8080` with port forwarding:
-
-```bash
-kubectl -n openfaas port-forward deployment/gateway 8080:8080
-```
-
-Before you expose OpenFaaS on the internet you need to secure the web UI and the OpenFaaS `/system` API.
+At this stage the gateway is not exposed outside the cluster and will enter a crash loop because it tries to mount 
+the basic auth credentials from a secret that's not yet present on the cluster.
 
 ### Manage Helm releases with Weave Flux
 
@@ -136,6 +130,93 @@ Flux Helm release fields:
 * `spec.releaseName` is optional and if not provided the release name will be `$namespace-$name`
 * `spec.chartGitPath` is the directory containing the chart, given relative to the charts path
 * `spec.values` are user customizations of default parameter values from the chart itself
+
+### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
+
+On the first Git sync, Flux deploys the Bitnami Sealed Secrets Controller. 
+Sealed-secrets is a Kubernetes Custom Resource Definition Controller that allows you to store 
+sensitive information in Git.
+
+![SealedSecrets](docs/screens/flux-secrets.png)
+
+In order to encrypt secrets you have to install the `kubeseal` CLI:
+
+```bash
+release=$(curl --silent "https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+GOOS=$(go env GOOS)
+GOARCH=$(go env GOARCH)
+wget https://github.com/bitnami/sealed-secrets/releases/download/$release/kubeseal-$GOOS-$GOARCH
+sudo install -m 755 kubeseal-$GOOS-$GOARCH /usr/local/bin/kubeseal
+```
+
+Navigate to `./secrets` dir and delete all files inside. 
+
+```bash
+rm -rf secrets && mkdir secrets
+```
+
+At startup, the Sealed Secrets Controller generates a RSA key and logs the public key. 
+Using `kubeseal` you can save your public key as `pub-cert.pem`, 
+the public key can be safely stored in Git, and you can use it to encrypt secrets **offline**:
+
+```bash
+kubeseal --fetch-cert \
+--controller-namespace=flux \
+--controller-name=sealed-secrets \
+> secrets/pub-cert.pem
+```
+
+Next let's create a secret with the basic auth credentials for the OpenFaaS Gateway. 
+
+Use `kubectl` to locally generate the basic-auth secret:
+
+```bash
+password=$(head -c 12 /dev/random | shasum| cut -d' ' -f1)
+echo $password
+
+kubectl -n openfaas create secret generic basic-auth \
+--from-literal=basic_auth_user=admin \
+--from-literal=basic_auth_password=$password \
+--dry-run \
+-o json > basic-auth.json
+```
+
+Encrypt the secret with `kubeseal` and save it in the `secrets` dir:
+
+```bash
+kubeseal --format=yaml --cert=secrets/pub-cert.pem < basic-auth.json > secrets/basic-auth.yaml
+```
+
+This generates a custom resource of type `SealedSecret` that contains the encrypted credentials:
+
+```yaml
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: basic-auth
+  namespace: openfaas
+spec:
+  encryptedData:
+    basic_auth_password: AgAR5nzhX2TkJ.......
+    basic_auth_user: AgAQDO58WniIV3gTk.......
+``` 
+
+Finally delete the `basic-auth.json` file and commit your changes:
+
+```bash
+rm basic-auth.json
+git add . && git commit -m "Add OpenFaaS basic auth credentials" && git push
+```
+
+The Flux daemon applies the sealed secret on your cluster. The Sealed Secrets Controller will then decrypt it into a 
+Kubernetes secret. 
+
+Now that the OpenFaaS credentials are stored in the cluster you can access the Gateway UI
+on your local machine at `http://localhost:8080` with port forwarding:
+
+```bash
+kubectl -n openfaas port-forward deployment/gateway 8080:8080
+```
 
 ### Manage OpenFaaS functions and auto-scaling with Weave Flux
 
@@ -248,122 +329,40 @@ spec:
 
 The above cron job calls the `nodeinfo` function every minute using `verbose` as payload.
 
-### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
-On the first Git sync, Flux deploys the Bitnami Sealed Secrets Controller. 
-Sealed-secrets is a Kubernetes Custom Resource Definition Controller that allows you to store 
-sensitive information in Git.
+### Expose OpenFaaS Gateway outside the cluster with Envoy and LE TLS
 
-![SealedSecrets](docs/screens/flux-secrets.png)
-
-In order to encrypt secrets you have to install the `kubeseal` CLI:
-
-```bash
-release=$(curl --silent "https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
-GOOS=$(go env GOOS)
-GOARCH=$(go env GOARCH)
-wget https://github.com/bitnami/sealed-secrets/releases/download/$release/kubeseal-$GOOS-$GOARCH
-sudo install -m 755 kubeseal-$GOOS-$GOARCH /usr/local/bin/kubeseal
-```
-
-Navigate to `./secrets` dir and delete all files inside. 
-
-```bash
-rm -rf secrets && mkdir secrets
-```
-
-At startup, the Sealed Secrets Controller generates a RSA key and logs the public key. 
-Using `kubeseal` you can save your public key as `pub-cert.pem`, 
-the public key can be safely stored in Git, and you can use it to encrypt secrets **offline**:
-
-```bash
-kubeseal --fetch-cert \
---controller-namespace=flux \
---controller-name=sealed-secrets \
-> secrets/pub-cert.pem
-```
-
-Next let's create a secret with the basic auth credentials for the OpenFaaS Gateway. 
-
-Use `kubectl` to locally generate the basic-auth secret:
-
-```bash
-password=$(head -c 12 /dev/random | shasum| cut -d' ' -f1)
-echo $password
-
-kubectl -n openfaas create secret generic basic-auth \
---from-literal=basic_auth_user=admin \
---from-literal=basic_auth_password=$password \
---dry-run \
--o json > basic-auth.json
-```
-
-Encrypt the secret with `kubeseal` and save it in the `secrets` dir:
-
-```bash
-kubeseal --format=yaml --cert=secrets/pub-cert.pem < basic-auth.json > secrets/basic-auth.yaml
-```
-
-This generates a custom resource of type `SealedSecret` that contains the encrypted credentials:
+Inside the [ingress](ingress) dir you can find a deployment definition for Heptio Contour.
+Contour is a Kubernetes ingress controller powered by the Envoy proxy. 
 
 ```yaml
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
+apiVersion: extensions/v1beta1
+kind: Ingress
 metadata:
-  name: basic-auth
+  name: gateway-ingress
   namespace: openfaas
+  annotations:
+    kubernetes.io/ingress.class: "contour"
 spec:
-  encryptedData:
-    password: AgAR5nzhX2TkJ.......
-    user: AgAQDO58WniIV3gTk.......
-``` 
-
-Finally delete the `basic-auth.json` file and commit your changes:
-
-```bash
-rm basic-auth.json
-git add . && git commit -m "Add OpenFaaS basic auth credentials" && git push
-```
-
-The Flux daemon applies the sealed secret on your cluster. The Sealed Secrets Controller will then decrypt it into a 
-Kubernetes secret.
-
-### Expose OpenFaaS Gateway outside the cluster
-
-Inside the [ingress](ingress) dir you can find a deployment definition for Caddy.
-Caddy acts as a reverse proxy for the OpenFaaS Gateway and uses the `basic-auth` secret to protect the 
-Gateway system API and UI. In order to deploy Caddy edit all manifests in the ingress dir and then delete the 
-`flux.weave.works/ignore` annotation.
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: caddy-lb
-  namespace: openfaas
-  labels:
-    app: caddy
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-      targetPort: 80
-      protocol: TCP
-  selector:
-    app: caddy
+  rules:
+    http:
+      paths:
+      - backend:
+          serviceName: gateway
+          servicePort: 8080
 ```
 
 Commit your changes:
 
 ```bash
-git add . && git commit -m "Enable OpenFaaS Caddy" && git push
+git add . && git commit -m "Enable OpenFaaS Ingress" && git push
 ```
 
 You can access the OpenFaaS Gateway using the LoadBalancer pubic IP 
 (depending on your cloud provider this can take several minutes):
 
 ```bash
-openfaas-ip=$(kubectl -n openfaas describe service caddy-lb | grep Ingress | awk '{ print $NF }')
+openfaas-ip=$(kubectl -n contour describe service contour | grep Ingress | awk '{ print $NF }')
 ```
 
 Wait for an external IP to be allocated and then use it to access the OpenFaaS Gateway UI
@@ -371,7 +370,7 @@ with your credentials at `http://$openfaas-ip`.
 
 Next enable TLS with LE by editing the Caddy [config](ingress/caddy-cfg.yaml) file.
 
-If you run Kubernetes on-prem or on bare-metal, you should change the Caddy service from LoadBalancer to 
+If you run Kubernetes on-prem or on bare-metal, you should change the Contour service from LoadBalancer to 
 NodePort to expose OpenFaaS on the internet.
 
 ### Manage Network Policies with Weave Flux

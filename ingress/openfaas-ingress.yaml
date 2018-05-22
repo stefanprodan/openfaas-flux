@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  namespace: openfaas
+  annotations:
+    kubernetes.io/ingress.class: "contour"
+spec:
+  rules:
+    http:
+      paths:
+      - backend:
+          serviceName: gateway
+          servicePort: 8080
