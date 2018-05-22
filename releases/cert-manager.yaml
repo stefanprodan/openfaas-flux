@@ -1,0 +1,17 @@
+---
+apiVersion: helm.integrations.flux.weave.works/v1alpha2
+kind: FluxHelmRelease
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+  labels:
+    chart: cert-manager
+spec:
+  chartGitPath: cert-manager
+  releaseName: cert-manager
+  values:
+    image:
+      repository: quay.io/jetstack/cert-manager-controller
+      tag: v0.2.5
+    rbac:
+      create: true

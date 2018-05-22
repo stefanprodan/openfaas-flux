@@ -335,30 +335,7 @@ The above cron job calls the `nodeinfo` function every minute using `verbose` as
 Inside the [ingress](ingress) dir you can find a deployment definition for Heptio Contour.
 Contour is a Kubernetes ingress controller powered by the Envoy proxy. 
 
-```yaml
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: gateway-ingress
-  namespace: openfaas
-  annotations:
-    kubernetes.io/ingress.class: "contour"
-spec:
-  rules:
-    http:
-      paths:
-      - backend:
-          serviceName: gateway
-          servicePort: 8080
-```
-
-Commit your changes:
-
-```bash
-git add . && git commit -m "Enable OpenFaaS Ingress" && git push
-```
-
-You can access the OpenFaaS Gateway using the LoadBalancer pubic IP 
+You can access the OpenFaaS Gateway using the Contour LoadBalancer pubic IP 
 (depending on your cloud provider this can take several minutes):
 
 ```bash
@@ -368,10 +345,12 @@ openfaas-ip=$(kubectl -n contour describe service contour | grep Ingress | awk '
 Wait for an external IP to be allocated and then use it to access the OpenFaaS Gateway UI
 with your credentials at `http://$openfaas-ip`.
 
-Next enable TLS with LE by editing the Caddy [config](ingress/caddy-cfg.yaml) file.
+If you run Kubernetes on-prem or on bare-metal, you should change the Contour [service](ingress/contour-svc.yaml)
+type from LoadBalancer to NodePort to expose OpenFaaS on the internet.
 
-If you run Kubernetes on-prem or on bare-metal, you should change the Contour service from LoadBalancer to 
-NodePort to expose OpenFaaS on the internet.
+In order to setup TLS with Let's Encrypt you should point your DNS to the Contour LoadBalancer IP.
+
+Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
 
 ### Manage Network Policies with Weave Flux
 
