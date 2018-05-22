@@ -18,6 +18,7 @@ spec:
       enabled: false
     exposeServices: false
     rbac: true
+    # requires the basic-auth secret mounted at /var/secrets
     basic_auth:
       enabled: true
     images:
