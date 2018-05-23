@@ -218,6 +218,30 @@ on your local machine at `http://localhost:8080` with port forwarding:
 kubectl -n openfaas port-forward deployment/gateway 8080:8080
 ```
 
+### Expose OpenFaaS Gateway outside the cluster with Envoy and LE TLS
+
+Inside the [ingress](ingress) dir you can find a deployment definition for Heptio Contour.
+Contour is a Kubernetes ingress controller powered by the Envoy proxy. 
+
+You can access the OpenFaaS Gateway using the Contour LoadBalancer pubic IP 
+(depending on your cloud provider this can take several minutes):
+
+```bash
+openfaas-ip=$(kubectl -n contour describe service contour | grep Ingress | awk '{ print $NF }')
+```
+
+Wait for an external IP to be allocated and then use it to access the OpenFaaS Gateway UI
+with your credentials at `http://$openfaas-ip`.
+
+If you run Kubernetes on-prem or on bare-metal, you should change the Contour [service](ingress/contour-svc.yaml)
+type from LoadBalancer to NodePort to expose OpenFaaS on the internet.
+
+In order to setup TLS with Let's Encrypt you should point your DNS to the Contour LoadBalancer IP.
+
+Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
+
+
+
 ### Manage OpenFaaS functions and auto-scaling with Weave Flux
 
 An OpenFaaS function is described through a Kubernetes custom resource named `function`.
@@ -328,29 +352,6 @@ spec:
 ```
 
 The above cron job calls the `nodeinfo` function every minute using `verbose` as payload.
-
-
-### Expose OpenFaaS Gateway outside the cluster with Envoy and LE TLS
-
-Inside the [ingress](ingress) dir you can find a deployment definition for Heptio Contour.
-Contour is a Kubernetes ingress controller powered by the Envoy proxy. 
-
-You can access the OpenFaaS Gateway using the Contour LoadBalancer pubic IP 
-(depending on your cloud provider this can take several minutes):
-
-```bash
-openfaas-ip=$(kubectl -n contour describe service contour | grep Ingress | awk '{ print $NF }')
-```
-
-Wait for an external IP to be allocated and then use it to access the OpenFaaS Gateway UI
-with your credentials at `http://$openfaas-ip`.
-
-If you run Kubernetes on-prem or on bare-metal, you should change the Contour [service](ingress/contour-svc.yaml)
-type from LoadBalancer to NodePort to expose OpenFaaS on the internet.
-
-In order to setup TLS with Let's Encrypt you should point your DNS to the Contour LoadBalancer IP.
-
-Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
 
 ### Manage Network Policies with Weave Flux
 

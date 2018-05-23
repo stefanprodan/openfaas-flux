@@ -32,8 +32,13 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "contour"
+        certmanager.k8s.io/cluster-issuer: "openfaas"
       hosts:
         - host: openfaas.weavedx.com
           serviceName: gateway
           servicePort: 8080
           path: /
+      tls:
+        - secretName: openfaas-cert
+          hosts:
+          - openfaas.weavedx.com
