@@ -240,7 +240,72 @@ In order to setup TLS with Let's Encrypt you should point your DNS to the Contou
 
 Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
 
+Create a cluster issuer in [ingress](ingress) dir with the following content:
 
+```yaml
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: openfaas
+  namespace: cert-manager
+spec:
+  acme:
+    email: your-email@domain.name
+    http01: {}
+    privateKeySecretRef:
+      name: openfaas-cert
+    server: https://acme-v01.api.letsencrypt.org/directory
+```
+
+Add the ingress definition to [releases/openfaas.yaml](releases/openfaas.yaml):
+
+```yaml
+apiVersion: helm.integrations.flux.weave.works/v1alpha2
+kind: FluxHelmRelease
+metadata:
+  name: openfaas
+  namespace: openfaas
+  labels:
+    chart: openfaas
+spec:
+  chartGitPath: openfaas
+  releaseName: openfaas
+  values:
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "contour"
+        certmanager.k8s.io/cluster-issuer: "openfaas"
+      hosts:
+        - host: openfaas.your-domain.name
+          serviceName: gateway
+          servicePort: 8080
+          path: /
+      tls:
+        - secretName: openfaas-cert
+          hosts:
+          - openfaas.your-domain.name
+```
+
+Commit and push your changes to Git:
+
+```bash
+git add . && git commit -m "Add OpenFaaS TLS ingress" && git push
+```
+
+After Flux applies the changes, you can check cert-manager logs and see if your certificate
+has been issued by letsencrypt.org:
+
+```bash
+kubectl -n cert-manager logs deployment/cert-manager-cert-manager cert-manager
+
+sync.go:238] Preparing certificate with issuer
+controller.go:152] clusterissuers controller: Finished processing work item "openfaas"
+sync.go:248] Issuing certificate...
+sync.go:269] Certificated issued successfully
+controller.go:187] certificates controller: syncing item 'openfaas/openfaas-cert'
+sync.go:200] Certificate scheduled for renewal in 1438 hours
+```
 
 ### Manage OpenFaaS functions and auto-scaling with Weave Flux
 
