@@ -22,7 +22,7 @@ spec:
     basic_auth:
       enabled: true
     images:
-      gateway: stefanprodan/gateway:auth-0.8
+      gateway: functions/gateway:0.8.2
       prometheus: prom/prometheus:v2.2.0
       alertmanager: prom/alertmanager:v0.15.0-rc.1
       nats: nats-streaming:0.6.0

@@ -240,7 +240,7 @@ In order to setup TLS with Let's Encrypt you should point your DNS to the Contou
 
 Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
 
-Create a cluster issuer definition in [ingress](ingress) dir with the following content
+Create a cluster issuer definition in [ingress](ingress) dir,
 replace `EMAIL@DOMAIN.NAME` with a valid email address:
 
 ```yaml
@@ -312,7 +312,7 @@ sync.go:200] Certificate scheduled for renewal in 1438 hours
 Verify the LE cert using `certinfo` function:
 
 ```bash
-curl -d "openfaas.your-domain.name" https://openfaas.your-domain.name/function/certinfo
+curl -d "your-domain.name" https://your-domain.name/function/certinfo
 
 Host 35.189.75.57
 Port 443
