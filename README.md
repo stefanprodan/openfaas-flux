@@ -240,7 +240,8 @@ In order to setup TLS with Let's Encrypt you should point your DNS to the Contou
 
 Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
 
-Create a cluster issuer in [ingress](ingress) dir with the following content:
+Create a cluster issuer definition in [ingress](ingress) dir with the following content
+replace `EMAIL@DOMAIN.NAME` with a valid email address:
 
 ```yaml
 apiVersion: certmanager.k8s.io/v1alpha1
@@ -250,14 +251,15 @@ metadata:
   namespace: cert-manager
 spec:
   acme:
-    email: your-email@domain.name
+    email: EMAIL@DOMAIN.NAME
     http01: {}
     privateKeySecretRef:
       name: openfaas-cert
     server: https://acme-v01.api.letsencrypt.org/directory
 ```
 
-Add the ingress definition to [releases/openfaas.yaml](releases/openfaas.yaml):
+Add the ingress definition to [releases/openfaas.yaml](releases/openfaas.yaml),
+replace `DOMAIN.NAME` with your own domain:
 
 ```yaml
 apiVersion: helm.integrations.flux.weave.works/v1alpha2
@@ -277,14 +279,14 @@ spec:
         kubernetes.io/ingress.class: "contour"
         certmanager.k8s.io/cluster-issuer: "openfaas"
       hosts:
-        - host: openfaas.your-domain.name
+        - host: DOMAIN.NAME
           serviceName: gateway
           servicePort: 8080
           path: /
       tls:
         - secretName: openfaas-cert
           hosts:
-          - openfaas.your-domain.name
+          - DOMAIN.NAME
 ```
 
 Commit and push your changes to Git:
@@ -305,6 +307,21 @@ sync.go:248] Issuing certificate...
 sync.go:269] Certificated issued successfully
 controller.go:187] certificates controller: syncing item 'openfaas/openfaas-cert'
 sync.go:200] Certificate scheduled for renewal in 1438 hours
+```
+
+Verify the LE cert using `certinfo` function:
+
+```bash
+curl -d "openfaas.your-domain.name" https://openfaas.your-domain.name/function/certinfo
+
+Host 35.189.75.57
+Port 443
+Issuer Let's Encrypt Authority X3
+CommonName openfaas.your-domain.name
+NotBefore 2018-05-23 07:15:20 +0000 UTC
+NotAfter 2018-08-21 07:15:20 +0000 UTC
+SANs [openfaas.your-domain.name]
+TimeRemaining 2 months from now
 ```
 
 ### Manage OpenFaaS functions and auto-scaling with Weave Flux
