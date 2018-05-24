@@ -117,7 +117,6 @@ spec:
     images:
       gateway: stefanprodan/gateway:auth-0.8
       prometheus: prom/prometheus:v2.2.0
-      alertmanager: prom/alertmanager:v0.15.0-rc.1
       nats: nats-streaming:0.6.0
       queueWorker: functions/queue-worker:0.4.3
       operator: functions/faas-o6s:0.4.0
@@ -130,6 +129,13 @@ Flux Helm release fields:
 * `spec.releaseName` is optional and if not provided the release name will be `$namespace-$name`
 * `spec.chartGitPath` is the directory containing the chart, given relative to the charts path
 * `spec.values` are user customizations of default parameter values from the chart itself
+
+The following Helm [releases](releases) are part of this setup:
+
+* [openfaas](releases/openfaas.yaml) (OpenFaaS Gateway, OpenFaaS K8s Operator, Prometheus, NATS, OpenFaaS Queue Worker)
+* [sealed-secrets](releases/sealed-secrets.yaml) (Bitnami SealedSecrets K8s Controller)
+* [contour](releases/contour.yaml) (Heptio Contour Envoy based K8s Ingress Controller)
+* [cert-manager](releases/cert-manager.yaml) (Jetstack CertManager K8s Controller for Let's Encrypt)
 
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
@@ -197,8 +203,8 @@ metadata:
   namespace: openfaas
 spec:
   encryptedData:
-    basic_auth_password: AgAR5nzhX2TkJ.......
-    basic_auth_user: AgAQDO58WniIV3gTk.......
+    basic-auth-password: AgAR5nzhX2TkJ.......
+    basic-auth-user: AgAQDO58WniIV3gTk.......
 ``` 
 
 Finally delete the `basic-auth.json` file and commit your changes:
