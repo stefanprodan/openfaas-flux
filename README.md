@@ -175,8 +175,8 @@ password=$(head -c 12 /dev/random | shasum| cut -d' ' -f1)
 echo $password
 
 kubectl -n openfaas create secret generic basic-auth \
---from-literal=basic_auth_user=admin \
---from-literal=basic_auth_password=$password \
+--from-literal=basic-auth-user=admin \
+--from-literal=basic-auth-password=$password \
 --dry-run \
 -o json > basic-auth.json
 ```
@@ -295,7 +295,7 @@ After Flux applies the changes, you can check cert-manager logs and see if your 
 has been issued by letsencrypt.org:
 
 ```bash
-kubectl -n cert-manager logs deployment/cert-manager-cert-manager cert-manager
+kubectl -n cert-manager logs deployment/cert-manager cert-manager
 
 sync.go:238] Preparing certificate with issuer
 controller.go:152] clusterissuers controller: Finished processing work item "openfaas"
