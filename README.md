@@ -516,7 +516,7 @@ kubectl get secret -n flux sealed-secrets-key -o yaml --export > sealed-secrets-
 To restore from backup after a disaster, replace the newly-created secret and restart the sealed-secrets controller:
 
 ```bash
-kubectl replace secret -n flux sealed-secrets-key sealed-secrets-key.yaml
+kubectl replace secret -n flux sealed-secrets-key -f sealed-secrets-key.yaml
 kubectl delete pod -n flux -l app=sealed-secrets
 ```
 
