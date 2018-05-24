@@ -1,0 +1,19 @@
+---
+apiVersion: helm.integrations.flux.weave.works/v1alpha2
+kind: FluxHelmRelease
+metadata:
+  name: contour
+  namespace: contour
+  labels:
+    chart: contour
+spec:
+  chartGitPath: contour
+  releaseName: contour
+  values:
+    replicaCount: 2
+    service:
+      type: LoadBalancer
+    rbac: true
+    images:
+      contour: gcr.io/heptio-images/contour:master
+      envoy: docker.io/envoyproxy/envoy-alpine:v1.6.0

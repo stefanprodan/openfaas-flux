@@ -1,0 +1,12 @@
+# Default values for contour.
+
+replicaCount: 2
+
+images:
+  contour: gcr.io/heptio-images/contour:master
+  envoy: docker.io/envoyproxy/envoy-alpine:v1.6.0
+
+service:
+  type: LoadBalancer
+
+rbac: true
