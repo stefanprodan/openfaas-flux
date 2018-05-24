@@ -106,7 +106,7 @@ spec:
         volumeMounts:
         - name: auth
           readOnly: true
-          mountPath: "/var/secrets"
+          mountPath: "/run/secrets"
         {{- end }}
       {{- if .Values.operator.create }}
       - name: operator
