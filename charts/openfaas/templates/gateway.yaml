@@ -98,6 +98,8 @@ spec:
         {{- if .Values.basic_auth.enabled }}
         - name: basic_auth
           value: "true"
+        - name: secret_mount_path
+          value: "/var/secrets"
         {{- end }}
         ports:
         - containerPort: 8080
@@ -106,7 +108,7 @@ spec:
         volumeMounts:
         - name: auth
           readOnly: true
-          mountPath: "/run/secrets"
+          mountPath: "/var/secrets"
         {{- end }}
       {{- if .Values.operator.create }}
       - name: operator
