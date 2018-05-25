@@ -135,7 +135,7 @@ The following Helm [releases](releases) are part of this setup:
 * [openfaas](releases/openfaas.yaml) (OpenFaaS Gateway, OpenFaaS K8s Operator, Prometheus, NATS, OpenFaaS Queue Worker)
 * [sealed-secrets](releases/sealed-secrets.yaml) (Bitnami SealedSecrets K8s Controller)
 * [contour](releases/contour.yaml) (Heptio Contour Envoy based K8s Ingress Controller)
-* [cert-manager](releases/cert-manager.yaml) (Jetstack CertManager K8s Controller for Let's Encrypt)
+* [cert-manager](releases/cert-manager.yaml) (Jetstack CertManager K8s Controller with Let's Encrypt support)
 
 ### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
 
