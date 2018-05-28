@@ -326,6 +326,84 @@ SANs [openfaas.your-domain.name]
 TimeRemaining 2 months from now
 ```
 
+### OpenFaaS Operator 
+
+The OpenFaaS Operator is an extension to the Kubernetes API that allows you to manage OpenFaaS functions
+in a declarative manner. The OpenFaaS Operator implements a control loop that tries to match the desired state of your 
+OpenFaaS functions defined as a collection of custom resources with the actual state of your cluster. 
+
+The OpenFaaS Operator is a drop-in replacement of the faas-netes controller. Some of the advantages of switching to the Operator are:
+
+* declarative API (Operator) vs imperative API (faas-netes)
+* use kubectl and/or faas-cli for functions CRUD operations (Operator) vs faas-cli only (faas-netes)
+* on deletion, function are garbage collected by the Kubernetes API (Operator) vs explicit deletion of a function deployment and ClusterIP service (faas-netes)
+* query the functions status via the Kubernetes API (Operator) vs query the status using faas-netes HTTP API
+* due to the reconciliation loop the Operator can handle transient Kubernetes API outages while faas-netes has no retry mechanism
+
+Deploy OpenFaaS with faas-netes:
+
+```bash
+git clone https://github.com/openfaas/faas-netes
+cd faas-netes
+kubectl apply -f ./namespaces.yml,./yaml
+```
+
+Deploy the Gateway with openfaas-operator sidecar in the `openfaas` namespace:
+
+```bash
+git clone https://github.com/openfaas-incubator/openfaas-operator
+# CRD
+kubectl apply -f artifacts/operator-crd.yaml
+# RBAC
+kubectl apply -f artifacts/operator-rbac.yaml
+# Deployment (use operator-armhf.yaml for faas-netes/yaml_armhf)
+kubectl apply -f artifacts/operator-amd64.yaml
+# Delete faas-netes
+kubectl -n openfaas delete deployment faas-netesd
+kubectl -n openfaas delete svc faas-netesd
+```
+
+If you've used faas-netes to run functions, you have to delete them and redeploy using faas-cli or kubectl.
+
+Using the OpenFaaS Operator you can define functions as a Kubernetes custom resource:
+
+```yaml
+apiVersion: o6s.io/v1alpha1
+kind: Function
+metadata:
+  name: certinfo
+  namespace: openfaas-fn
+spec:
+  name: certinfo
+  image: stefanprodan/certinfo
+  labels:
+    com.openfaas.scale.min: "2"
+    com.openfaas.scale.max: "12"
+    com.openfaas.scale.factor: "4"
+  environment:
+    output: "verbose"
+    debug: "true"
+  secrets:
+    - my-key
+    - my-token
+  limits:
+    cpu: "1000m"
+    memory: "128Mi"
+  requests:
+    cpu: "10m"
+    memory: "64Mi"
+  constraints:
+    - "cloud.google.com/gke-nodepool=default-pool"
+```
+
+Save the above resource as `certinfo.yaml` and use kubectl to deploy the function:
+
+```bash
+kubectl -n openfaas-fn apply -f certinfo.yaml
+```
+
+Since certinfo requires the `my-key` and `my-token` secrets the Operator will not be able to 
+
 ### Manage OpenFaaS functions and auto-scaling with Weave Flux
 
 An OpenFaaS function is described through a Kubernetes custom resource named `function`.
