@@ -340,6 +340,8 @@ The OpenFaaS Operator is a drop-in replacement of the faas-netes controller. Som
 * query the function status via the Kubernetes API (Operator) vs query the status using faas-netes HTTP API
 * due to the reconciliation loop the Operator can handle transient Kubernetes API outages while faas-netes has no retry mechanism
 
+![openfaas-operator](docs/screens/openfaas-operator.png)
+
 Deploy OpenFaaS with faas-netes:
 
 ```bash
