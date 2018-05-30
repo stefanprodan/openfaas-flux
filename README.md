@@ -426,9 +426,9 @@ Since certinfo requires the `my-key` and `my-token` secrets the Operator will no
 You can view the operator logs with:
 
 ```bash
-kubectl -n openfaas logs deployment/gateway operator
+kubectl -n openfaas logs deployment/gateway -c operator
 
-E0528 17:22:50.880987       1 controller.go:215] error syncing 'openfaas-fn/certinfo': secret "my-key" not found
+controller.go:215] error syncing 'openfaas-fn/certinfo': secret "my-key" not found
 ```
 
 Let's create the secrets:
