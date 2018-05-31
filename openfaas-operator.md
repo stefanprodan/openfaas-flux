@@ -1,5 +1,5 @@
 
-### Introducing the OpenFaaS Kubernetes Operator 
+# Introducing the OpenFaaS Kubernetes Operator 
 
 The OpenFaaS Operator is an extension to the Kubernetes API that allows you to manage OpenFaaS functions
 in a declarative manner. The OpenFaaS Operator implements a control loop that tries to match the desired state of your 
@@ -14,6 +14,8 @@ The OpenFaaS Operator is a drop-in replacement of the faas-netes controller. Som
 * due to the reconciliation loop the Operator can handle transient Kubernetes API outages while faas-netes has no retry mechanism
 
 ![openfaas-operator](docs/screens/openfaas-operator.png)
+
+### Install 
 
 Deploy OpenFaaS with faas-netes:
 
@@ -47,6 +49,8 @@ kubectl -n openfaas delete svc faas-netesd
 ```
 
 If you've used faas-netes to run functions, you have to delete them and redeploy using faas-cli or kubectl.
+
+### Usage 
 
 Using the OpenFaaS Operator you can define functions as a Kubernetes custom resource:
 
@@ -143,3 +147,4 @@ You can delete a function with:
 ```bash
 kubectl -n openfaas-fn delete function certinfo
 ```
+
