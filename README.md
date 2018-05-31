@@ -139,7 +139,7 @@ The following Helm [releases](releases) are part of this setup:
 * [contour](releases/contour.yaml) (Heptio Contour Envoy based K8s Ingress Controller)
 * [cert-manager](releases/cert-manager.yaml) (Jetstack CertManager K8s Controller with Let's Encrypt support)
 
-### Manage Secretes with Bitnami Sealed Secrets Controller and Weave Flux
+### Manage Secrets with Bitnami Sealed Secrets Controller and Weave Flux
 
 On the first Git sync, Flux deploys the Bitnami Sealed Secrets Controller. 
 Sealed-secrets is a Kubernetes Custom Resource Definition Controller that allows you to store 
