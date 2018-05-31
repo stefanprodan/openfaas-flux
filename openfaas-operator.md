@@ -95,7 +95,8 @@ Save the above resource as `certinfo.yaml` and use kubectl to deploy the functio
 kubectl -n openfaas-fn apply -f certinfo.yaml
 ```
 
-Since certinfo requires the `my-key` and `my-token` secrets the Operator will not be able to create a deployment.
+Since certinfo requires the `my-key` and `my-token` secrets, the Operator will not be able to create a deployment but 
+will keep retrying.
 You can view the operator logs with:
 
 ```bash
