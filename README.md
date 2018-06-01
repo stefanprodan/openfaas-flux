@@ -340,7 +340,7 @@ specified in the resources.
 OpenFaaS function definition:
 
 ```yaml
-apiVersion: o6s.io/v1alpha1
+apiVersion: openfaas.com/v1alpha2
 kind: Function
 metadata:
   name: sentimentanalysis

@@ -55,7 +55,7 @@ If you've used faas-netes to run functions, you have to delete them and redeploy
 Using the OpenFaaS Operator you can define functions as a Kubernetes custom resource:
 
 ```yaml
-apiVersion: o6s.io/v1alpha1
+apiVersion: openfaas.com/v1alpha2
 kind: Function
 metadata:
   name: certinfo
