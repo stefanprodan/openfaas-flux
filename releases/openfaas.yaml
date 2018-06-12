@@ -10,6 +10,10 @@ spec:
   chartGitPath: openfaas
   releaseName: openfaas
   values:
+    gateway:
+      readTimeout : "20s"
+      writeTimeout : "20s"
+      replicas: 1
     # control the async parallelism the worker replica count
     queueWorker:
       replicas: 3

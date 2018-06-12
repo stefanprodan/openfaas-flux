@@ -14,7 +14,7 @@ faasnetesd:
 gateway:
   readTimeout : "20s"
   writeTimeout : "20s"
-  replicas: 2
+  replicas: 1
 
 queueWorker:
   ackWait : "30s"
