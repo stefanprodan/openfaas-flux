@@ -63,7 +63,7 @@ spec:
         runAsUser: 10001
       containers:
       - name: gateway
-        image: {{ .Values.images.gateway }}
+        image: {{ .Values.gateway.image }}
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -112,7 +112,7 @@ spec:
         {{- end }}
       {{- if .Values.operator.create }}
       - name: operator
-        image: {{ .Values.images.operator }} 
+        image: {{ .Values.operator.image }}
         imagePullPolicy: Always
         command:
           - ./openfaas-operator
