@@ -14,6 +14,7 @@ spec:
     service:
       type: LoadBalancer
     rbac: true
-    images:
-      contour: gcr.io/heptio-images/contour:master
-      envoy: docker.io/envoyproxy/envoy-alpine:v1.6.0
+    contour:
+      image: gcr.io/heptio-images/contour:master
+    envoy:
+      image: docker.io/envoyproxy/envoy-alpine:v1.6.0

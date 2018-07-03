@@ -25,7 +25,7 @@ spec:
         prometheus.io/format: "prometheus"
     spec:
       containers:
-      - image: {{ .Values.images.envoy }}
+      - image: {{ .Values.envoy.image }}
         name: envoy
         ports:
         - containerPort: 8080
@@ -37,7 +37,7 @@ spec:
         volumeMounts:
         - name: contour-config
           mountPath: /config
-      - image: {{ .Values.images.contour }}
+      - image: {{ .Values.contour.image }}
         imagePullPolicy: Always
         name: contour
         command: ["contour"]
