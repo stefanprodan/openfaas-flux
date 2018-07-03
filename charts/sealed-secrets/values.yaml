@@ -2,10 +2,11 @@
 
 replicaCount: 1
 
-image:
-  repository: quay.io/bitnami/sealed-secrets-controller
-  tag: v0.7.0
-  pullPolicy: IfNotPresent
+image: quay.io/bitnami/sealed-secrets-controller:v0.7.0
+#  repository: quay.io/bitnami/sealed-secrets-controller
+#  tag: v0.7.0
+
+pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
