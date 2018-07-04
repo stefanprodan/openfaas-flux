@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
       - name: alertmanager
-        image: {{ .Values.images.alertmanager }}
+        image: {{ .Values.alertmanager.image }}
         imagePullPolicy: Always
         command:
           - "alertmanager"

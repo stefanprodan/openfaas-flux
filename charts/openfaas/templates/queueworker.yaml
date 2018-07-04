@@ -22,7 +22,7 @@ spec:
         runAsUser: 10001
       containers:
       - name:  queue-worker
-        image: {{ .Values.images.queueWorker }}
+        image: {{ .Values.queueWorker.image }}
         imagePullPolicy: Always
         {{- if .Values.functionNamespace }}
         env:

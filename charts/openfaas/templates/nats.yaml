@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name:  nats
-        image: {{ .Values.images.nats }}
+        image: {{ .Values.nats.image }}
         imagePullPolicy: Always
         ports:
         - containerPort: 4222

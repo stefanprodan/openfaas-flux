@@ -10,6 +10,7 @@ faasnetesd:
   readTimeout : "20s"
   writeTimeout : "20s"
   replicas: 1
+  image: functions/faas-netesd:0.5.1
 
 gateway:
   image: functions/gateway:0.8.2
@@ -20,6 +21,7 @@ gateway:
 queueWorker:
   ackWait : "30s"
   replicas: 1
+  image: functions/queue-worker:0.4.3
 
 operator:
   image: functions/openfaas-operator:0.7.0
@@ -31,13 +33,12 @@ autoscaling:
 basic_auth:
   enabled: true
 
-# images
-images:
-  controller: functions/faas-netesd:0.5.1
-  prometheus: prom/prometheus:v2.2.0
-  alertmanager: prom/alertmanager:v0.15.0-rc.0
-  nats: nats-streaming:0.6.0
-  queueWorker: functions/queue-worker:0.4.3
+prometheus:
+  image: prom/prometheus:v2.2.0
+alertmanager:
+  image: prom/alertmanager:v0.15.0-rc.1
+nats:
+  image: nats-streaming:0.6.0
 
 # ingress configuration
 ingress:
