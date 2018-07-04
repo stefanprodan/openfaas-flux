@@ -6,6 +6,14 @@ metadata:
   namespace: openfaas
   labels:
     chart: openfaas
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.gateway: glob:0.*.*
+    flux.weave.works/tag.operator: glob:0.*.*
+    flux.weave.works/tag.queue-worker: glob:0.*.*
+    flux.weave.works/tag.prometheus: glob:v2.*.*
+    flux.weave.works/tag.alertmanager: glob:v0.*.*
+    flux.weave.works/tag.nats: glob:0.6.*
 spec:
   chartGitPath: openfaas
   releaseName: openfaas
