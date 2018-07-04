@@ -1,0 +1,1 @@
+{"jobID":"a1511e48-9ebe-43cf-78ed-140413be77d3","spec":{"type":"policy","cause":{"Message":"","User":"stefan \u003cstefan@weave.works\u003e"},"spec":{"flux:fluxhelmrelease/sealed-secrets":{"add":{"automated":"true"},"remove":null}}},"result":null}
