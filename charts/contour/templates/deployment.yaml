@@ -43,7 +43,7 @@ spec:
         command: ["contour"]
         args: ["serve", "--incluster"]
       initContainers:
-      - image: {{ .Values.images.contour }}
+      - image: {{ .Values.contour.image }}
         imagePullPolicy: Always
         name: envoy-initconfig
         command: ["contour"]
