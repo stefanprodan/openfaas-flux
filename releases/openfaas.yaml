@@ -24,7 +24,7 @@ spec:
       writeTimeout: "20s"
       replicas: 2
     operator:
-      image: functions/openfaas-operator:0.7.1
+      image: functions/openfaas-operator:0.8.0
     # control the async parallelism the worker replica count
     queueWorker:
       replicas: 3
