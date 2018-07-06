@@ -418,6 +418,8 @@ kind: CronJob
 metadata:
   name: cron-nodeinfo
   namespace: openfaas
+  annotations:
+    flux.weave.works/automated: "true"
 spec:
   schedule: "*/1 * * * *"
   concurrencyPolicy: Forbid
@@ -438,6 +440,14 @@ spec:
 ```
 
 The above cron job calls the `nodeinfo` function every minute using `verbose` as payload.
+
+You can instruct Flux to update the cron job container image by adding the
+`flux.weave.works/automated` annotation. 
+
+When a new tag is pushed to Docker Hub, Flux will change the cron job definition in the yaml file, will commit and push 
+the change to your git repo and finally will apply the change on your cluster. 
+
+![cronjob-update](docs/screens/flux-git-push.png)
 
 ### Manage Network Policies with Weave Flux
 
