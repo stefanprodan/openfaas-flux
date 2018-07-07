@@ -5,14 +5,6 @@ The OpenFaaS Operator is an extension to the Kubernetes API that allows you to m
 in a declarative manner. The OpenFaaS Operator implements a control loop that tries to match the desired state of your 
 OpenFaaS functions defined as a collection of custom resources with the actual state of your cluster. 
 
-The OpenFaaS Operator is a drop-in replacement of the faas-netes controller. Some of the advantages of switching to the Operator are:
-
-* declarative API (Operator) vs imperative API (faas-netes)
-* use kubectl and/or faas-cli for functions CRUD operations (Operator) vs faas-cli only (faas-netes)
-* on deletion, functions are garbage collected by the Kubernetes API (Operator) vs explicit deletion of a function deployment and ClusterIP service (faas-netes)
-* query the function status via the Kubernetes API (Operator) vs query the status using faas-netes HTTP API
-* due to the reconciliation loop the Operator can handle transient Kubernetes API outages while faas-netes has no retry mechanism
-
 ![openfaas-operator](docs/screens/openfaas-operator.png)
 
 ### Setup a Kubernetes cluster 
@@ -84,8 +76,7 @@ helm init --skip-refresh --upgrade --service-account tiller
 Create the OpenFaaS namespaces:
 
 ```bash
-kubectl create namespace openfaas && \
-kubectl create namespace openfaas-fn
+kubectl apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml
 ```
 
 Generate a random password and create OpenFaaS credentials secret:
@@ -114,11 +105,11 @@ helm upgrade openfaas --install openfaas/openfaas \
 Find the gateway address and login with faas-cli (it could take some time for the ELB to be online):
 
 ```yaml
-export OFELB=$(kubectl -n openfaas describe svc/gateway-external | grep Ingress | awk '{ print $NF }')
-echo $password | faas-cli login -u admin -g $OFELB:8080 --password-stdin
+export OPENFAAS_URL=$(kubectl -n openfaas describe svc/gateway-external | grep Ingress | awk '{ print $NF }'):8080
+echo $password | faas-cli login -u admin --password-stdin
 ```
 
-You can access the OpenFaaS UI at `http://$OFELB:8080/ui` using the admin credentials. 
+You can access the OpenFaaS UI at `http://OPENFAAS_URL` using the admin credentials. 
 
 ### Manage OpenFaaS function with kubectl 
 
@@ -218,5 +209,9 @@ You can delete a function with:
 kubectl -n openfaas-fn delete function certinfo
 ```
 
+### Conclusion 
 
+The OpenFaaS Operator offers more options on managing functions on top of Kubernetes.
+Besides faas-cli and the OpenFaaS UI now you can use kubectl, Helm charts and Weave Flux to build your 
+continuous deployment pipelines.
 
