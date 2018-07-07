@@ -1,5 +1,5 @@
 
-# Introducing the OpenFaaS Kubernetes Operator 
+# Getting started with OpenFaaS Kubernetes Operator 
 
 The OpenFaaS Operator is an extension to the Kubernetes API that allows you to manage OpenFaaS functions
 in a declarative manner. The OpenFaaS Operator implements a control loop that tries to match the desired state of your 
@@ -15,42 +15,110 @@ The OpenFaaS Operator is a drop-in replacement of the faas-netes controller. Som
 
 ![openfaas-operator](docs/screens/openfaas-operator.png)
 
-### Install 
+### Setup a Kubernetes cluster 
 
-Deploy OpenFaaS with faas-netes:
+Since Amazon just launched their hosted Kubernetes service let's try it out. 
+You will need to have AWS API credentials configured.
 
-```bash
-git clone https://github.com/openfaas/faas-netes
-cd faas-netes
-kubectl apply -f ./namespaces.yml,./yaml
-```
-
-Deploy the Gateway with openfaas-operator sidecar in the `openfaas` namespace:
+First install [eksctl](https://eksctl.io), a simple CLI tool for creating clusters:
 
 ```bash
-git clone https://github.com/openfaas-incubator/openfaas-operator
-cd openfaas-operator
-
-# CRD
-kubectl apply -f artifacts/operator-crd.yaml
-
-# RBAC
-kubectl apply -f artifacts/operator-rbac.yaml
-
-# Deployment (use operator-armhf.yaml for ARM)
-kubectl apply -f artifacts/operator-amd64.yaml
+brew install weaveworks/tap/eksctl
 ```
 
-Delete faas-netes:
+You will also need heptio-authenticator-aws:
+
+```bash
+curl -o heptio-authenticator-aws https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-06-05/bin/darwin/amd64/heptio-authenticator-aws
+chmod +x ./heptio-authenticator-aws
+sudo mv ./heptio-authenticator-aws /usr/local/heptio-authenticator-aws
+```
+
+Create a EKS cluster with:
+
+```bash
+eksctl create cluster --name=openfaas \
+    --nodes=2 \
+    --region=us-west-2 \
+    --node-type=m5.xlarge \
+    --kubeconfig=./kubeconfig.openfaas.yaml
+```
+
+Use the cluster credentials with kubectl:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.openfaas.yaml
+kubectl get nodes
+```
+
+You will be using Helm to install OpenFaaS, for Helm to work with EKS you need v2.9.1 or latest.
+
+Install Helm CLI:
+
+```bash
+brew install kubernetes-helm
+```
+
+Create a service account for Tiller:
+
+```bash
+kubectl -n kube-system create sa tiller
+```
+
+Create a cluster role binding for Tiller:
+
+```bash
+kubectl create clusterrolebinding tiller-cluster-rule \
+    --clusterrole=cluster-admin \
+    --serviceaccount=kube-system:tiller 
+```
+
+Deploy Tiller in kube-system namespace:
+
+```bash
+helm init --skip-refresh --upgrade --service-account tiller
+```
+
+### Install OpenFaaS with Helm
+
+Create the OpenFaaS namespaces:
+
+```bash
+kubectl create namespace openfaas && \
+kubectl create namespace openfaas-fn
+```
+
+Generate a random password and create OpenFaaS credentials secret:
+
+```bash
+password=$(head -c 12 /dev/urandom | shasum| cut -d' ' -f1)
+
+kubectl -n openfaas create secret generic basic-auth \
+--from-literal=basic-auth-user=admin \
+--from-literal=basic-auth-password=$password
+```
+
+Install OpenFaaS:
+
+```bash
+helm upgrade openfaas --install ./chart/openfaas \
+    --namespace openfaas  \
+    --set functionNamespace=openfaas-fn \
+    --set serviceType=LoadBalancer \
+    --set basic_auth=true \
+    --set operator.create=true
+```
+
+Find the gateway address and login with faas-cli (it could take some time for the ELB to be online):
 
 ```yaml
-kubectl -n openfaas delete deployment faas-netesd
-kubectl -n openfaas delete svc faas-netesd
+export OFELB=$(kubectl -n openfaas describe svc/gateway-external | grep Ingress | awk '{ print $NF }')
+echo $password | faas-cli login -u admin -g $OFELB:8080 --password-stdin
 ```
 
-If you've used faas-netes to run functions, you have to delete them and redeploy using faas-cli or kubectl.
+You can access the OpenFaaS UI at `http://$OFELB:8080/ui` using the admin credentials. 
 
-### Usage 
+### Manage OpenFaaS function with kubectl 
 
 Using the OpenFaaS Operator you can define functions as a Kubernetes custom resource:
 
@@ -62,7 +130,7 @@ metadata:
   namespace: openfaas-fn
 spec:
   name: certinfo
-  image: stefanprodan/certinfo
+  image: stefanprodan/certinfo:latest
   # translates to Kubernetes metadata.labels
   labels:
     # if you plan to use Kubernetes HPA v2 
@@ -147,4 +215,6 @@ You can delete a function with:
 ```bash
 kubectl -n openfaas-fn delete function certinfo
 ```
+
+
 
