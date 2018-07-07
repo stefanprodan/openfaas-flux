@@ -48,6 +48,8 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "contour"
         contour.heptio.com/request-timeout: "30s"
+        contour.heptio.com/num-retries: "3"
+        contour.heptio.com/retry-on: "gateway-error"
         certmanager.k8s.io/cluster-issuer: "openfaas"
       hosts:
       - host: openfaas.weavedx.com
