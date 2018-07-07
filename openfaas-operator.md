@@ -101,7 +101,9 @@ kubectl -n openfaas create secret generic basic-auth \
 Install OpenFaaS:
 
 ```bash
-helm upgrade openfaas --install ./chart/openfaas \
+helm repo add openfaas https://openfaas.github.io/faas-netes/
+
+helm upgrade openfaas --install openfaas/openfaas \
     --namespace openfaas  \
     --set functionNamespace=openfaas-fn \
     --set serviceType=LoadBalancer \
