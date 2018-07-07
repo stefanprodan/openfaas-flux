@@ -47,6 +47,7 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "contour"
+        contour.heptio.com/request-timeout: "30s"
         certmanager.k8s.io/cluster-issuer: "openfaas"
       hosts:
       - host: openfaas.weavedx.com

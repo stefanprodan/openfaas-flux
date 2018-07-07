@@ -110,18 +110,20 @@ spec:
   chartGitPath: openfaas
   releaseName: openfaas
   values:
-    exposeServices: false
-    rbac: true
+    basic_auth:
+      enabled: true
+    gateway:
+      image: openfaas/gateway:0.8.5
+      replicas: 2
+    operator:
+      image: functions/openfaas-operator:0.8.0
     queueWorker:
+      image: functions/queue-worker:0.4.4
       replicas: 3
-    autoscaling:
-      enabled: false
-    images:
-      gateway: stefanprodan/gateway:auth-0.8
-      prometheus: prom/prometheus:v2.2.0
-      nats: nats-streaming:0.6.0
-      queueWorker: functions/queue-worker:0.4.3
-      operator: functions/faas-o6s:0.4.0
+    nats:
+      image: nats-streaming:0.6.0
+    prometheus:
+      image: prom/prometheus:v2.3.1
 ```
 
 Flux Helm release fields:
