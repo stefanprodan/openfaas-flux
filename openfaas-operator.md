@@ -339,6 +339,8 @@ helm repo update && helm upgrade --install --wait weave-cloud \
   stable/weave-cloud
 ```
 
+![weave-cloud-eks](docs/screens/weavecloud-eks.png)
+
 Navigate to Weave Cloud Explore to inspect your cluster:
 
 ![weave-cloud-explore](docs/screens/weavecloud-eks-scope.png)
