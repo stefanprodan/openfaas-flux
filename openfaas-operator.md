@@ -343,7 +343,7 @@ helm repo update && helm upgrade --install --wait weave-cloud \
 
 Navigate to Weave Cloud Explore to inspect your cluster:
 
-![weave-cloud-explore](docs/screens/weavecloud-eks-scope.png)
+![weave-cloud-explore](docs/screens/weavecloud-explore.png)
 
 Weave Cloud extends Prometheus by providing a distributed, multi-tenant, horizontally scalable version of Prometheus.
 It hosts the scraped Prometheus metrics for you, so that you don’t have to worry about storage or backups.
