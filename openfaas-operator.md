@@ -218,6 +218,113 @@ You can delete a function with:
 kubectl -n openfaas-fn delete function certinfo
 ```
 
+### Setup OpenFaaS Gateway with Let's Encrypt TLS
+
+When exposing OpenFaaS on the internet you should enforce HTTPS. In order to do that you'll be using the following tools:
+
+* [Heptio Contour](https://github.com/heptio/contour) as Kubernetes Ingress controller
+* [JetStack cert-manager](https://github.com/jetstack/cert-manager) as Let's Encrypt provider 
+
+Install Contour with:
+
+```bash
+kubectl apply -f https://j.hept.io/contour-deployment-rbac
+```
+
+Find Contour address with:
+
+```yaml
+kubectl -n heptio-contour describe svc/contour | grep Ingress | awk '{ print $NF }'
+```
+
+Go to your DNS provider and create a `CNAME` record for OpenFaaS, something like:
+
+```bash
+$ host openfaas-eks.weavedx.com
+openfaas-eks.weavedx.com is an alias for a3ed4798d829511e8ae6402c29a3fb92-1221266221.us-west-2.elb.amazonaws.com.
+a3ed4798d829511e8ae6402c29a3fb92-1221266221.us-west-2.elb.amazonaws.com has address 52.42.237.76
+a3ed4798d829511e8ae6402c29a3fb92-1221266221.us-west-2.elb.amazonaws.com has address 34.209.173.53
+```
+
+Install cert-manager with Helm:
+
+```bash
+helm install --name cert-manager \
+    --namespace kube-system \
+    stable/cert-manager
+```
+
+Create a cluster issuer definition (replace `EMAIL@DOMAIN.NAME` with a valid email address):
+
+```yaml
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    email: EMAIL@DOMAIN.NAME
+    http01: {}
+    privateKeySecretRef:
+      name: letsencrypt-cert
+    server: https://acme-v02.api.letsencrypt.org/directory
+```
+
+Save the above resource as `letsencrypt-issuer.yaml` and apply it:
+
+```bash
+kubectl apply -f ./letsencrypt-issuer.yaml
+```
+
+Create a ingress definition for OpenFaaS (replace `openfaas-eks.weavedx.com` with your own domain name):
+
+```yaml
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "contour"
+    certmanager.k8s.io/cluster-issuer: "letsencrypt"
+  hosts:
+    - host: openfaas-eks.weavedx.com
+      serviceName: gateway
+      servicePort: 8080
+      path: /
+  tls:
+    - secretName: openfaas-cert
+      hosts:
+      - openfaas-eks.weavedx.com
+```
+
+Save the above resource as `ingress.yaml` and upgrade the OpenFaaS release with Helm:
+
+```bash
+helm upgrade --reuse-values -f ./ingress.yaml openfaas openfaas/openfaas
+```
+
+In a couple of seconds cert-manager should fetch a certificate from LE:
+
+```
+kubectl -n kube-system logs deployment/cert-manager-cert-manager
+
+successfully obtained certificate: cn="openfaas-eks.weavedx.com" altNames=[openfaas-eks.weavedx.com] url="https://acme-v02.api.letsencrypt.org/acme/order/37983868/14618101"
+Certificate issued successfully
+```
+
+Verify the certificate with `certinfo` function:
+
+```bash
+curl -d "openfaas-eks.weavedx.com" https://openfaas-eks.weavedx.com/function/certinfo
+
+Host 52.42.237.76
+Port 443
+Issuer Let's Encrypt Authority X3
+CommonName openfaas-eks.weavedx.com
+NotBefore 2018-07-08 09:41:15 +0000 UTC
+NotAfter 2018-10-06 09:41:15 +0000 UTC
+SANs [openfaas-eks.weavedx.com]
+TimeRemaining 2 months from now
+```
+
 ### Conclusion 
 
 The OpenFaaS Operator offers more options on managing functions on top of Kubernetes.
