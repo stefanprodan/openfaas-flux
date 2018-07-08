@@ -1,18 +1,24 @@
 
-# Getting started with OpenFaaS Kubernetes Operator 
+# Getting started with OpenFaaS Kubernetes Operator on EKS
 
-The OpenFaaS Operator is an extension to the Kubernetes API that allows you to manage OpenFaaS functions
-in a declarative manner. The OpenFaaS Operator implements a control loop that tries to match the desired state of your 
+The OpenFaaS team has recently released a Kubernetes operator for OpenFaaS. 
+For an overview of why and how we created the operator head to Alex Ellis blog and read the [Introducing the OpenFaaS Operator for Serverless on Kubernetes](https://blog.alexellis.io/introducing-the-openfaas-operator/). 
+
+My post is a step-by-step guide on running OpenFaaS with the operator on top of Amazon managed Kubernetes service.
+
+The OpenFaaS Operator comes with an extension to the Kubernetes API that allows you to manage OpenFaaS functions
+in a declarative manner. The operator implements a control loop that tries to match the desired state of your 
 OpenFaaS functions defined as a collection of custom resources with the actual state of your cluster. 
 
 ![openfaas-operator](docs/screens/openfaas-operator.png)
 
-### Setup a Kubernetes cluster 
+### Setup a Kubernetes cluster with eksctl
 
-Since Amazon just launched their hosted Kubernetes service let's try it out. 
-You will need to have AWS API credentials configured.
+In order to create an EKS cluster you can use [eksctl](https://eksctl.io). 
+Eksctl is an open source command-line made by Weaveworks in collaboration with Amazon, 
+it's written in Go and based on EKS CloudFormation templates.
 
-First install [eksctl](https://eksctl.io), a simple CLI tool for creating clusters:
+On MacOS you can install eksctl with Homebrew:
 
 ```bash
 brew install weaveworks/tap/eksctl
@@ -36,36 +42,32 @@ eksctl create cluster --name=openfaas \
     --kubeconfig=./kubeconfig.openfaas.yaml
 ```
 
-Use the cluster credentials with kubectl:
+Connect to the EKS cluster using the generated credential file:
 
 ```bash
 export KUBECONFIG=$PWD/kubeconfig.openfaas.yaml
 kubectl get nodes
 ```
 
-You will be using Helm to install OpenFaaS, for Helm to work with EKS you need v2.9.1 or latest.
+You will be using Helm to install OpenFaaS, for Helm to work with EKS you need version 2.9.1 or newer.
 
-Install Helm CLI:
+Install Helm CLI with Homebrew:
 
 ```bash
 brew install kubernetes-helm
 ```
 
-Create a service account for Tiller:
+Create a service account and cluster role binding for Tiller:
 
 ```bash
 kubectl -n kube-system create sa tiller
-```
 
-Create a cluster role binding for Tiller:
-
-```bash
 kubectl create clusterrolebinding tiller-cluster-rule \
     --clusterrole=cluster-admin \
     --serviceaccount=kube-system:tiller 
 ```
 
-Deploy Tiller in kube-system namespace:
+Deploy Tiller on EKS:
 
 ```bash
 helm init --skip-refresh --upgrade --service-account tiller
@@ -102,18 +104,25 @@ helm upgrade openfaas --install openfaas/openfaas \
     --set operator.create=true
 ```
 
-Find the gateway address and login with faas-cli (it could take some time for the ELB to be online):
+Find the gateway address (it could take some time for the ELB to be online):
 
 ```yaml
 export OPENFAAS_URL=$(kubectl -n openfaas describe svc/gateway-external | grep Ingress | awk '{ print $NF }'):8080
-echo $password | faas-cli login -u admin --password-stdin
 ```
 
 You can access the OpenFaaS UI at `http://OPENFAAS_URL` using the admin credentials. 
 
-### Manage OpenFaaS function with kubectl 
+Install the OpenFaaS CLI and use the same credentials to login:
 
-Using the OpenFaaS Operator you can define functions as a Kubernetes custom resource:
+```bash
+curl -sL https://cli.openfaas.com | sudo sh
+
+echo $password | faas-cli login -u admin --password-stdin
+```
+
+### Manage OpenFaaS functions with kubectl 
+
+Using the OpenFaaS CRD you can define functions as a Kubernetes custom resource:
 
 ```yaml
 apiVersion: openfaas.com/v1alpha2
@@ -213,5 +222,8 @@ kubectl -n openfaas-fn delete function certinfo
 
 The OpenFaaS Operator offers more options on managing functions on top of Kubernetes.
 Besides faas-cli and the OpenFaaS UI now you can use kubectl, Helm charts and Weave Flux to build your 
-continuous deployment pipelines.
+continuous deployment pipelines. 
+
+If you have questions about the operator please join the `#kubernetes` channel on 
+[OpenFaaS Slack](https://docs.openfaas.com/community/).  
 
