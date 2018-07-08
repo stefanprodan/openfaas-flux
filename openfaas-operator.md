@@ -325,6 +325,37 @@ SANs [openfaas-eks.weavedx.com]
 TimeRemaining 2 months from now
 ```
 
+### Monitoring EKS and OpenFaaS with Weave Cloud
+
+Now that you have a EKS cluster up and running you can start monitoring it with Weave Cloud. 
+You'll need a Weave Could service token, if you don't have a Weave token go to Weave Cloud and sign up for a [trial account](https://www.weave.works/).
+
+Deploy the Weave Cloud agents with Helm:
+
+```bash
+helm repo update && helm upgrade --install --wait weave-cloud \
+  --set token=YOUR-WEAVE-CLOUD-TOKEN \
+  --namespace weave \
+  stable/weave-cloud
+```
+
+Navigate to Weave Cloud Explore to inspect your cluster:
+
+![weave-cloud-explore](docs/screens/weavecloud-eks-scope.png)
+
+Weave Cloud extends Prometheus by providing a distributed, multi-tenant, horizontally scalable version of Prometheus.
+It hosts the scraped Prometheus metrics for you, so that you don’t have to worry about storage or backups.
+
+Weave Cloud comes with canned dashboards for Kubernetes that you can use to monitor a specific namespace:
+
+![weave-cloud-monitor](docs/screens/weavecloud-monitor.png)
+
+It also detects OpenFaaS workloads and shows RED metrics stats as well as golang internals:
+
+![weave-cloud-of](docs/screens/weavecloud-openfaas.png)
+
+![weave-cloud-golang](docs/screens/weavecloud-golang.png)
+
 ### Conclusion 
 
 The OpenFaaS Operator offers more options on managing functions on top of Kubernetes.
