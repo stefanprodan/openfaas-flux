@@ -14,6 +14,8 @@ OpenFaaS functions defined as a collection of custom resources with the actual s
 
 ### Setup a Kubernetes cluster with eksctl
 
+![weave-cloud-eks](docs/screens/weavecloud-eks.png)
+
 In order to create an EKS cluster you can use [eksctl](https://eksctl.io). 
 Eksctl is an open source command-line made by Weaveworks in collaboration with Amazon, 
 it's written in Go and based on EKS CloudFormation templates.
@@ -339,8 +341,6 @@ helm repo update && helm upgrade --install --wait weave-cloud \
   stable/weave-cloud
 ```
 
-![weave-cloud-eks](docs/screens/weavecloud-eks.png)
-
 Navigate to Weave Cloud Explore to inspect your cluster:
 
 ![weave-cloud-explore](docs/screens/weavecloud-eks-scope.png)
@@ -352,9 +352,13 @@ Weave Cloud comes with canned dashboards for Kubernetes that you can use to moni
 
 ![weave-cloud-monitor](docs/screens/weavecloud-monitor.png)
 
-It also detects OpenFaaS workloads and shows RED metrics stats as well as golang internals:
+It also detects OpenFaaS workloads and shows RED metrics stats as well as golang internals.
+
+Navigate to Weave Cloud Workloads, select openfaas:deployment/gateway and click on the OpenFaaS tab:
 
 ![weave-cloud-of](docs/screens/weavecloud-openfaas.png)
+
+Navigate to Weave Cloud Workloads, select openfaas:deployment/gateway and click on the Go tab:
 
 ![weave-cloud-golang](docs/screens/weavecloud-golang.png)
 
