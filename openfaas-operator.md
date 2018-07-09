@@ -103,7 +103,7 @@ kubectl apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/na
 Generate a random password and create OpenFaaS credentials secret:
 
 ```bash
-password=$(head -c 12 /dev/urandom | shasum| cut -d' ' -f1)
+password=$(head -c 12 /dev/urandom | shasum | cut -d' ' -f1)
 
 kubectl -n openfaas create secret generic basic-auth \
 --from-literal=basic-auth-user=admin \
