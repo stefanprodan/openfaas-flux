@@ -2,9 +2,10 @@
 # Getting started with OpenFaaS Kubernetes Operator on EKS
 
 The OpenFaaS team has recently released a Kubernetes operator for OpenFaaS. 
-For an overview of why and how we created the operator head to Alex Ellis blog and read the [Introducing the OpenFaaS Operator for Serverless on Kubernetes](https://blog.alexellis.io/introducing-the-openfaas-operator/). 
+For an overview of why and how we created the operator head to Alex Ellis' blog and read the [Introducing the OpenFaaS Operator for Serverless on Kubernetes](https://blog.alexellis.io/introducing-the-openfaas-operator/). 
 
-My post is a step-by-step guide on running OpenFaaS with the operator on top of Amazon managed Kubernetes service.
+The OpenFaaS Operator can be run with OpenFaaS on any Kubernetes service, 
+in this post I will show you step-by-step instructions of how to deploy to Amazon's managed Kubernetes service (EKS).
 
 The OpenFaaS Operator comes with an extension to the Kubernetes API that allows you to manage OpenFaaS functions
 in a declarative manner. The operator implements a control loop that tries to match the desired state of your 
@@ -13,8 +14,6 @@ OpenFaaS functions defined as a collection of custom resources with the actual s
 ![openfaas-operator](docs/screens/openfaas-operator.png)
 
 ### Setup a Kubernetes cluster with eksctl
-
-![weave-cloud-eks](docs/screens/weavecloud-eks.png)
 
 In order to create an EKS cluster you can use [eksctl](https://eksctl.io). 
 Eksctl is an open source command-line made by Weaveworks in collaboration with Amazon, 
@@ -65,7 +64,7 @@ Flags:
 Connect to the EKS cluster using the generated config file:
 
 ```bash
-export KUBECONFIG=~/kube/eksctl/clusters/openfaas
+export KUBECONFIG=~/.kube/eksctl/clusters/openfaas
 kubectl get nodes
 ```
 
@@ -111,7 +110,7 @@ kubectl -n openfaas create secret generic basic-auth \
 --from-literal=basic-auth-password=$password
 ```
 
-Install OpenFaaS:
+Install OpenFaaS from the project helm repository:
 
 ```bash
 helm repo add openfaas https://openfaas.github.io/faas-netes/
@@ -130,7 +129,7 @@ Find the gateway address (it could take some time for the ELB to be online):
 export OPENFAAS_URL=$(kubectl -n openfaas describe svc/gateway-external | grep Ingress | awk '{ print $NF }'):8080
 ```
 
-You can access the OpenFaaS UI at `http://OPENFAAS_URL` using the admin credentials. 
+Run `echo http://$OPENFAAS_URL` to get the URL for the OpenFaaS UI portal.
 
 Install the OpenFaaS CLI and use the same credentials to login:
 
@@ -139,6 +138,8 @@ curl -sL https://cli.openfaas.com | sudo sh
 
 echo $password | faas-cli login -u admin --password-stdin
 ```
+
+The credentials are stored in a YAML file at `~/.openfaas/config.yaml`.
 
 ### Manage OpenFaaS functions with kubectl 
 
@@ -219,16 +220,16 @@ NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 certinfo            1         1         1            1           1m
 ```
 
-Test that secrets are available inside the certinfo pod at `var/openfaas/`:
+Test that secrets are available inside the certinfo pod at `var/openfaas/secrets`:
 
 ```bash
 export CERT_POD=$(kubectl get pods -n openfaas-fn -l "app=certinfo" -o jsonpath="{.items[0].metadata.name}")
 kubectl -n openfaas-fn exec -it $CERT_POD -- sh
 
-~ $ cat /var/openfaas/my-key 
+~ $ cat /var/openfaas/secrets/my-key 
 demo-key
 
-~ $ cat /var/openfaas/my-token 
+~ $ cat /var/openfaas/secrets/my-token 
 demo-token
 ``` 
 
@@ -240,7 +241,8 @@ kubectl -n openfaas-fn delete function certinfo
 
 ### Setup OpenFaaS Gateway with Let's Encrypt TLS
 
-When exposing OpenFaaS on the internet you should enforce HTTPS. In order to do that you'll be using the following tools:
+When exposing OpenFaaS on the internet you should enable HTTPS to encrypt all traffic. 
+In order to do that you'll be using the following tools:
 
 * [Heptio Contour](https://github.com/heptio/contour) as Kubernetes Ingress controller
 * [JetStack cert-manager](https://github.com/jetstack/cert-manager) as Let's Encrypt provider 
@@ -366,17 +368,17 @@ Navigate to Weave Cloud Explore to inspect your cluster:
 Weave Cloud extends Prometheus by providing a distributed, multi-tenant, horizontally scalable version of Prometheus.
 It hosts the scraped Prometheus metrics for you, so that you don’t have to worry about storage or backups.
 
-Weave Cloud comes with canned dashboards for Kubernetes that you can use to monitor a specific namespace:
+Weave Cloud comes with canned dashboards and alerts for Kubernetes that you can use to monitor a specific namespace:
 
 ![weave-cloud-monitor](docs/screens/weavecloud-monitor.png)
 
 It also detects OpenFaaS workloads and shows RED metrics stats as well as golang internals.
 
-Navigate to Weave Cloud Workloads, select openfaas:deployment/gateway and click on the OpenFaaS tab:
+Navigate to Weave Cloud Workloads, select `openfaas:deployment/gateway` and click on the OpenFaaS tab:
 
 ![weave-cloud-of](docs/screens/weavecloud-openfaas.png)
 
-Navigate to Weave Cloud Workloads, select openfaas:deployment/gateway and click on the Go tab:
+Navigate to Weave Cloud Workloads, select `openfaas:deployment/gateway` and click on the Go tab:
 
 ![weave-cloud-golang](docs/screens/weavecloud-golang.png)
 
