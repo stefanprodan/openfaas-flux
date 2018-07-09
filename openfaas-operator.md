@@ -26,28 +26,46 @@ On MacOS you can install eksctl with Homebrew:
 brew install weaveworks/tap/eksctl
 ```
 
-You will also need heptio-authenticator-aws:
-
-```bash
-curl -o heptio-authenticator-aws https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-06-05/bin/darwin/amd64/heptio-authenticator-aws
-chmod +x ./heptio-authenticator-aws
-sudo mv ./heptio-authenticator-aws /usr/local/heptio-authenticator-aws
-```
-
-Create a EKS cluster with:
+Create an EKS cluster with:
 
 ```bash
 eksctl create cluster --name=openfaas \
     --nodes=2 \
     --region=us-west-2 \
     --node-type=m5.xlarge \
-    --kubeconfig=./kubeconfig.openfaas.yaml
+    --auto-kubeconfig
 ```
 
-Connect to the EKS cluster using the generated credential file:
+Eksclt offers many options when creating a cluster:
 
 ```bash
-export KUBECONFIG=$PWD/kubeconfig.openfaas.yaml
+$ eksctl create cluster --help
+
+Usage:
+  eksctl create cluster [flags]
+
+Flags:
+      --auto-kubeconfig            save kubconfig file by cluster name, e.g. "/Users/stefan/.kube/eksctl/clusters/extravagant-wardrobe-1531126688"
+      --aws-api-timeout duration   number of seconds after which to timeout AWS API operations (default 20m0s)
+      --full-ecr-access            enable full access to ECR
+  -h, --help                       help for cluster
+      --kubeconfig string          path to write kubeconfig (incompatible with --auto-kubeconfig) (default "/Users/aleph/.kube/config")
+  -n, --name string                EKS cluster name (generated if unspecified, e.g. "extravagant-wardrobe-1531126688")
+  -t, --node-type string           node instance type (default "m5.large")
+  -N, --nodes int                  total number of nodes (for a static ASG) (default 2)
+  -M, --nodes-max int              maximum nodes in ASG
+  -m, --nodes-min int              minimum nodes in ASG
+  -p, --profile string             AWS creditials profile to use (overrides the AWS_PROFILE environment variable)
+  -r, --region string              AWS region (default "us-west-2")
+      --set-kubeconfig-context     if true then current-context will be set in kubeconfig; if a context is already set then it will be overwritten (default true)
+      --ssh-public-key string      SSH public key to use for nodes (import from local path, or use existing EC2 key pair) (default "~/.ssh/id_rsa.pub")
+      --write-kubeconfig           toggle writing of kubeconfig (default true)
+```
+
+Connect to the EKS cluster using the generated config file:
+
+```bash
+export KUBECONFIG=~/kube/eksctl/clusters/openfaas
 kubectl get nodes
 ```
 
