@@ -16,7 +16,7 @@ OpenFaaS functions defined as a collection of custom resources with the actual s
 ### Setup a Kubernetes cluster with eksctl
 
 In order to create an EKS cluster you can use [eksctl](https://eksctl.io). 
-Eksctl is an open source command-line made by Weaveworks in collaboration with Amazon, 
+eksctl is an open source command-line made by Weaveworks in collaboration with Amazon,
 it's written in Go and based on EKS CloudFormation templates.
 
 On MacOS you can install eksctl with Homebrew:
@@ -35,7 +35,7 @@ eksctl create cluster --name=openfaas \
     --auto-kubeconfig
 ```
 
-Eksclt offers many options when creating a cluster:
+eksctl offers many options when creating a cluster:
 
 ```bash
 $ eksctl create cluster --help
@@ -103,7 +103,7 @@ kubectl apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/na
 Generate a random password and create OpenFaaS credentials secret:
 
 ```bash
-password=$(head -c 12 /dev/urandom | shasum| cut -d' ' -f1)
+password=$(head -c 12 /dev/urandom | shasum | cut -d' ' -f1)
 
 kubectl -n openfaas create secret generic basic-auth \
 --from-literal=basic-auth-user=admin \
