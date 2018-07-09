@@ -166,7 +166,7 @@ spec:
   environment:
     output: "verbose"
     debug: "true"
-  # secrets are mounted as readonly files at /var/openfaas/
+  # secrets are mounted as readonly files at /var/openfaas/secrets
   # if you use a private registry add your image pull secret to the list 
   secrets:
     - my-key
@@ -247,6 +247,7 @@ In order to do that you'll be using the following tools:
 * [Heptio Contour](https://github.com/heptio/contour) as Kubernetes Ingress controller
 * [JetStack cert-manager](https://github.com/jetstack/cert-manager) as Let's Encrypt provider 
 
+Heptio Contour is an ingress controller based on [Envoy](https://www.envoyproxy.io) reverse proxy that supports dynamic configuration updates. 
 Install Contour with:
 
 ```bash
@@ -306,6 +307,9 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: "contour"
     certmanager.k8s.io/cluster-issuer: "letsencrypt"
+    contour.heptio.com/request-timeout: "30s"
+    contour.heptio.com/num-retries: "3"
+    contour.heptio.com/retry-on: "gateway-error"
   hosts:
     - host: openfaas-eks.weavedx.com
       serviceName: gateway
@@ -390,4 +394,3 @@ continuous deployment pipelines.
 
 If you have questions about the operator please join the `#kubernetes` channel on 
 [OpenFaaS Slack](https://docs.openfaas.com/community/).  
-
