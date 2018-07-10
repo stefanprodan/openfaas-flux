@@ -386,7 +386,7 @@ Navigate to Weave Cloud Workloads, select `openfaas:deployment/gateway` and clic
 
 ![weave-cloud-golang](docs/screens/weavecloud-golang.png)
 
-###Set up CloudWatch Integration with Weave Cloud
+### Set up CloudWatch Integration with Weave Cloud
 
 Monitor your AWS ELB service by configuring Weave Cloud to work with CloudWatch.  After logging into Weave Cloud, select the settings icon from the main menu and choose `AWS CloudWatch` beneath configure. Following the instructions in the screens provided. You have two choices, you can use the AWS GUI or you can configure it with the AWSCLI. 
 
