@@ -1,23 +1,23 @@
 
 # Getting started with OpenFaaS Kubernetes Operator on EKS
 
-The OpenFaaS team has recently released a Kubernetes operator for OpenFaaS. 
-For an overview of why and how we created the operator head to Alex Ellis' blog and read the [Introducing the OpenFaaS Operator for Serverless on Kubernetes](https://blog.alexellis.io/introducing-the-openfaas-operator/). 
+The OpenFaaS team recently released a Kubernetes operator for OpenFaaS. 
+For an overview of why and how we created the operator head over to Alex Ellis' blog and read the [Introducing the OpenFaaS Operator for Serverless on Kubernetes](https://blog.alexellis.io/introducing-the-openfaas-operator/). 
 
 The OpenFaaS Operator can be run with OpenFaaS on any Kubernetes service, 
-in this post I will show you step-by-step instructions of how to deploy to Amazon's managed Kubernetes service (EKS).
+in this post I will show you step-by-step instructions on how to deploy to Amazon's managed Kubernetes service (EKS).
 
 The OpenFaaS Operator comes with an extension to the Kubernetes API that allows you to manage OpenFaaS functions
 in a declarative manner. The operator implements a control loop that tries to match the desired state of your 
-OpenFaaS functions defined as a collection of custom resources with the actual state of your cluster. 
+OpenFaaS functions, defined as a collection of custom resources, with the actual state of your cluster. 
 
 ![openfaas-operator](docs/screens/openfaas-operator.png)
 
 ### Setup a Kubernetes cluster with eksctl
 
 In order to create an EKS cluster you can use [eksctl](https://eksctl.io). 
-eksctl is an open source command-line made by Weaveworks in collaboration with Amazon,
-it's written in Go and based on EKS CloudFormation templates.
+eksctl is an open source command-line utility made by Weaveworks in collaboration with Amazon,
+it's written in Go and is based on EKS CloudFormation templates.
 
 On MacOS you can install eksctl with Homebrew:
 
@@ -68,7 +68,7 @@ export KUBECONFIG=~/.kube/eksctl/clusters/openfaas
 kubectl get nodes
 ```
 
-You will be using Helm to install OpenFaaS, for Helm to work with EKS you need version 2.9.1 or newer.
+You will be using Helm to install OpenFaaS. For Helm to work with EKS you need version 2.9.1 or newer.
 
 Install Helm CLI with Homebrew:
 
@@ -76,7 +76,7 @@ Install Helm CLI with Homebrew:
 brew install kubernetes-helm
 ```
 
-Create a service account and cluster role binding for Tiller:
+Create a service account and a cluster role binding for Tiller:
 
 ```bash
 kubectl -n kube-system create sa tiller
@@ -100,7 +100,7 @@ Create the OpenFaaS namespaces:
 kubectl apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml
 ```
 
-Generate a random password and create OpenFaaS credentials secret:
+Generate a random password and create an OpenFaaS credentials secret:
 
 ```bash
 password=$(head -c 12 /dev/urandom | shasum | cut -d' ' -f1)
@@ -184,7 +184,7 @@ spec:
     - "beta.kubernetes.io/arch=amd64"
 ```
 
-Save the above resource as `certinfo.yaml` and use kubectl to deploy the function:
+Save the above resource as `certinfo.yaml` and use `kubectl` to deploy the function:
 
 ```bash
 kubectl -n openfaas-fn apply -f certinfo.yaml
@@ -192,7 +192,7 @@ kubectl -n openfaas-fn apply -f certinfo.yaml
 
 Since certinfo requires the `my-key` and `my-token` secrets, the Operator will not be able to create a deployment but 
 will keep retrying.
-You can view the operator logs with:
+View the operator logs with:
 
 ```bash
 kubectl -n openfaas logs deployment/gateway -c operator
@@ -242,7 +242,7 @@ kubectl -n openfaas-fn delete function certinfo
 ### Setup OpenFaaS Gateway with Let's Encrypt TLS
 
 When exposing OpenFaaS on the internet you should enable HTTPS to encrypt all traffic. 
-In order to do that you'll be using the following tools:
+To do that you'll need the following tools:
 
 * [Heptio Contour](https://github.com/heptio/contour) as Kubernetes Ingress controller
 * [JetStack cert-manager](https://github.com/jetstack/cert-manager) as Let's Encrypt provider 
@@ -254,7 +254,7 @@ Install Contour with:
 kubectl apply -f https://j.hept.io/contour-deployment-rbac
 ```
 
-Find Contour address with:
+Find the Contour address with:
 
 ```yaml
 kubectl -n heptio-contour describe svc/contour | grep Ingress | awk '{ print $NF }'
@@ -293,13 +293,13 @@ spec:
     server: https://acme-v02.api.letsencrypt.org/directory
 ```
 
-Save the above resource as `letsencrypt-issuer.yaml` and apply it:
+Save the above resource as `letsencrypt-issuer.yaml` and then apply it:
 
 ```bash
 kubectl apply -f ./letsencrypt-issuer.yaml
 ```
 
-Create a ingress definition for OpenFaaS (replace `openfaas-eks.weavedx.com` with your own domain name):
+Create an ingress definition for OpenFaaS (replace `openfaas-eks.weavedx.com` with your own domain name):
 
 ```yaml
 ingress:
@@ -353,8 +353,8 @@ TimeRemaining 2 months from now
 
 ### Monitoring EKS and OpenFaaS with Weave Cloud
 
-Now that you have a EKS cluster up and running you can start monitoring it with Weave Cloud. 
-You'll need a Weave Could service token, if you don't have a Weave token go to Weave Cloud and sign up for a [trial account](https://www.weave.works/).
+Now that you have an EKS cluster up and running you can use Weave Cloud to monitor it. 
+You'll need to get a Weave Could service token.  If you don't have already have a Weave token, go to Weave Cloud and sign up for a [free trial account](https://www.weave.works/).
 
 Deploy the Weave Cloud agents with Helm:
 
@@ -365,7 +365,7 @@ helm repo update && helm upgrade --install --wait weave-cloud \
   stable/weave-cloud
 ```
 
-Navigate to Weave Cloud Explore to inspect your cluster:
+Navigate to Weave Cloud Explore and inspect your cluster:
 
 ![weave-cloud-explore](docs/screens/weavecloud-explore.png)
 
@@ -376,7 +376,7 @@ Weave Cloud comes with canned dashboards and alerts for Kubernetes that you can 
 
 ![weave-cloud-monitor](docs/screens/weavecloud-monitor.png)
 
-It also detects OpenFaaS workloads and shows RED metrics stats as well as golang internals.
+It can also detect OpenFaaS workloads and shows RED metrics stats as well as Golang internals.
 
 Navigate to Weave Cloud Workloads, select `openfaas:deployment/gateway` and click on the OpenFaaS tab:
 
@@ -386,11 +386,22 @@ Navigate to Weave Cloud Workloads, select `openfaas:deployment/gateway` and clic
 
 ![weave-cloud-golang](docs/screens/weavecloud-golang.png)
 
+###Set up CloudWatch Integration with Weave Cloud
+
+Monitor your AWS ELB service by configuring Weave Cloud to work with CloudWatch.  After logging into Weave Cloud, select the settings icon from the main menu and choose `AWS CloudWatch` beneath configure. Following the instructions in the screens provided. You have two choices, you can use the AWS GUI or you can configure it with the AWSCLI. 
+
+![weave-cloud-aws-cloudwatch](docs/screens/aws-cloudwatch-config.png)
+
+Once metrics start getting pushed to Weave Cloud, you can monitor your ELB service from the AWS Cloudwatch dashboards by clicking Monitor --> AWS CloudWatch. 
+
+![weave-cloud-ELB-monitoring](docs/screens/elb-monitoring.png)
+
+
 ### Conclusion 
 
-The OpenFaaS Operator offers more options on managing functions on top of Kubernetes.
-Besides faas-cli and the OpenFaaS UI now you can use kubectl, Helm charts and Weave Flux to build your 
-continuous deployment pipelines. 
+The OpenFaaS Operator offers more options for managing functions on top of Kubernetes.
+Besides the faas-cli and the OpenFaaS UI, you can now use kubectl, Helm charts and Weave Flux to build your 
+continuous deployment pipelines. You because Weave Cloud integrates with AWS'CloudWatch, you can use it to monitor your ELB service as well.   
 
 If you have questions about the operator please join the `#kubernetes` channel on 
 [OpenFaaS Slack](https://docs.openfaas.com/community/).  
