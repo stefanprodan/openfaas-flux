@@ -1,9 +1,8 @@
 # OpenFaaS GitOps workflow with Weave Flux 
 
-This is a step by step guide on how to set up a GitOps workflow for OpenFaaS with Weave Flux. 
+This is a step-by-step guide on how to set up a GitOps workflow for OpenFaaS with Weave Flux. 
 GitOps is a way to do Continuous Delivery, it works by using Git as a source of truth for 
-declarative infrastructure and workloads. 
-In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
+declarative infrastructure and workloads. In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
 
 OpenFaaS (Functions as a Service) is Serverless Functions Made Simple for Docker and Kubernetes. 
 With OpenFaaS you can package any container or binary as a serverless function - from Node.js to Golang to C# on 
@@ -38,7 +37,7 @@ helm install --name flux \
 weaveworks/flux
 ```
 
-You can connect Weave Flux to Weave Cloud using a service token:
+Connect Weave Flux to Weave Cloud using a service token:
 
 ```bash
 helm install --name flux \
@@ -50,7 +49,7 @@ helm install --name flux \
 weaveworks/flux
 ```
 
-Note that Flux Helm Operator works with Kubernetes 1.9 or newer.
+**Note:** The Flux Helm Operator only works with Kubernetes 1.9 or newer.
 
 ### Setup Git sync
 
@@ -149,7 +148,7 @@ sensitive information in Git.
 
 ![SealedSecrets](docs/screens/flux-secrets.png)
 
-In order to encrypt secrets you have to install the `kubeseal` CLI:
+In order to encrypt secrets, install the `kubeseal` CLI:
 
 ```bash
 release=$(curl --silent "https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
@@ -167,7 +166,7 @@ rm -rf secrets && mkdir secrets
 
 At startup, the Sealed Secrets Controller generates a RSA key and logs the public key. 
 Using `kubeseal` you can save your public key as `pub-cert.pem`, 
-the public key can be safely stored in Git, and you can use it to encrypt secrets **offline**:
+the public key can be safely stored in Git, and can be used to encrypt secrets **offline**:
 
 ```bash
 kubeseal --fetch-cert \
@@ -242,9 +241,9 @@ public-ip=$(kubectl -n contour describe service contour | grep Ingress | awk '{ 
 If you run Kubernetes on-prem or on bare-metal, you should change the Contour [service](releases/contour.yaml)
 type from LoadBalancer to NodePort to expose OpenFaaS on the internet.
 
-In order to setup TLS with Let's Encrypt you should point your DNS to the Contour LoadBalancer IP.
+In order to setup TLS with Let's Encrypt point your DNS to the Contour LoadBalancer IP.
 
-Once the DNS is set you can use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
+Once the DNS is set, use Jetstack's cert-manager to request a TLS certificate for your domain from LE.
 
 Create a cluster issuer definition in the [certs](certs) dir,
 replace `EMAIL@DOMAIN.NAME` with a valid email address:
@@ -524,7 +523,7 @@ metadata:
 
 In order to recover from a major disaster like a cluster melt down, all you need to to is create a new Kubernetes cluster, 
 deploy Flux with Helm and update the SSH public key in the GitHub repo. 
-Weave Flux will restore all workloads on the new cluster, the only manifests that will fail to apply will be the sealed 
+Weave Flux will restore all workloads on the new cluster, the only manifests that will fail to apply are the sealed 
 secrets since the private key used for decryption will have changed. 
 
 To prepare for disaster recovery you should backup the SealedSecrets private key with:
