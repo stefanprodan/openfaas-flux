@@ -396,12 +396,16 @@ Once metrics start getting pushed to Weave Cloud, you can monitor your ELB servi
 
 ![weave-cloud-ELB-monitoring](docs/screens/elb-monitoring.png)
 
+### Acknowledgements
+
+Thanks to [Alex Ellis](https://twitter.com/alexellisuk) - for reviewing and feedback. 
+Thanks to OpenFaaS community and especially to early adopters - for comprehensive testing.
 
 ### Conclusion 
 
 The OpenFaaS Operator offers more options for managing functions on top of Kubernetes.
-Besides the faas-cli and the OpenFaaS UI, you can now use kubectl, Helm charts and Weave Flux to build your 
-continuous deployment pipelines. You because Weave Cloud integrates with AWS'CloudWatch, you can use it to monitor your ELB service as well.   
+Besides the faas-cli and the OpenFaaS UI, you can now use kubectl, Helm charts and Weave Flux to build your CI/CD pipelines.
+Running OpenFaaS on EKS and Weave Cloud you get a production ready function-as-a-service platform with builtin continuous deployment, monitoring and alerting.
 
 If you have questions about the operator please join the `#kubernetes` channel on 
 [OpenFaaS Slack](https://docs.openfaas.com/community/).  
