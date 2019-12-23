@@ -1,0 +1,9 @@
+# Default values for functions.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+certinfo:
+  image: stefanprodan/certinfo:1.0.0
+
+podinfo:
+  image: stefanprodan/podinfo:3.1.0

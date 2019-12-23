@@ -1,0 +1,15 @@
+apiVersion: openfaas.com/v1alpha2
+kind: Function
+metadata:
+  name: podinfo
+  labels:
+{{ include "functions.labels" . | indent 4 }}
+spec:
+  name: podinfo
+  image: {{ .Values.podinfo.image }}
+  annotations:
+    com.openfaas.health.http.initialDelay: 2s
+    com.openfaas.health.http.path: /healthz
+  labels:
+    com.openfaas.scale.min: "1"
+    com.openfaas.scale.max: "5"

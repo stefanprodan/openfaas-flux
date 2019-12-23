@@ -1,0 +1,10 @@
+apiVersion: openfaas.com/v1alpha2
+kind: Function
+metadata:
+  name: certinfo
+  labels:
+{{ include "functions.labels" . | indent 4 }}
+spec:
+  name: certinfo
+  image: {{ .Values.certinfo.image }}
+  readOnlyRootFilesystem: true
