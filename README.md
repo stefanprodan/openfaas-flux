@@ -1,15 +1,16 @@
-# OpenFaaS GitOps workflow with Weave Flux 
+# OpenFaaS GitOps workflow with FluxCD
 
-This is a step-by-step guide on how to set up a GitOps workflow for OpenFaaS with Flux CD and its Helm Operator. 
+This is a step-by-step guide on how to set up a [GitOps](https://www.weave.works/blog/kubernetes-anti-patterns-let-s-do-gitops-not-ciops)
+workflow for OpenFaaS with Flux CD and its Helm Operator.
 GitOps is a way to do Continuous Delivery, it works by using Git as a source of truth for 
-declarative infrastructure and workloads. In practice this means using `git push` instead of `kubectl create/apply` or `helm install/upgrade`. 
+declarative infrastructure and workloads. In practice this means using `git push`
+instead of `kubectl apply/delete` or `helm install/upgrade`. 
 
-OpenFaaS (Functions as a Service) is Serverless Functions Made Simple for Docker and Kubernetes. 
-With OpenFaaS you can package any container or binary as a serverless function - from Node.js to Golang to C# on 
-Linux or Windows. 
+[OpenFaaS](https://www.openfaas.com/) is an open source faction-as-a-service platform for Kubernetes.
+With OpenFaaS you can package any container or binary as a serverless function - from Node.js to Golang to C# on Linux or Windows. 
 
-Flux is a GitOps Operator for Kubernetes that keeps your cluster state is sync with a Git repository.
-Because Flux is pull based and also runs inside Kubernetes, you don't have to expose the cluster 
+[Flux](https://fluxcd.io) is a GitOps Operator for Kubernetes that keeps your cluster state is sync with a Git repository.
+Because Flux is pull based and also runs inside Kubernetes, you don't have to expose the cluster
 credentials outside your production environment.
 Once you enable Flux on your cluster any changes in your production environment are done via
 pull request with rollback and audit logs provided by Git. 
@@ -23,24 +24,24 @@ policies altering.
 
 You'll need a Kubernetes cluster v1.11 or newer with load balancer support, a GitHub account, git and kubectl installed locally.
 
-Install Helm v3 and fluxctl for macOS:
-
-```sh
-brew install helm fluxctl
-```
-
-For Windows:
-
-```sh
-choco install kubernetes-helm fluxctl
-```
-
 On GitHub, fork the [openfaas-flux](https://github.com/stefanprodan/openfaas-flux) repository and clone it locally
 (replace `stefanprodan` with your GitHub username): 
 
 ```sh
 git clone https://github.com/stefanprodan/openfaas-flux
 cd openfaas-flux
+```
+
+Install Helm v3 and fluxctl for macOS with Homebrew:
+
+```sh
+brew install helm fluxctl
+```
+
+On Windows you can use Chocolatey:
+
+```sh
+choco install kubernetes-helm fluxctl
 ```
 
 ### Install Flux and Helm Operator
@@ -71,7 +72,7 @@ Install the `HelmRelease` Kubernetes custom resource definition:
 kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/flux-helm-release-crd.yaml
 ```
 
-Install Flux Helm Operator with Helm v3 support:
+Install Flux Helm Operator with ***Helm v3*** support:
 
 ```bash
 helm upgrade -i helm-operator fluxcd/helm-operator --wait \
@@ -119,7 +120,7 @@ A chart release is described through a Kubernetes custom resource named `HelmRel
 The Flux daemon synchronizes these resources from git to the cluster,
 and the Helm operator makes sure Helm charts are released as specified in the resources.
 
-![helm](docs/screens/flux-helm.png)
+![flux helm v3](docs/screens/flux-helm-v3.png)
 
 Let's take a look at the OpenFaaS definition by running `cat ./releases/openfaas.yaml` inside the git repo:
 
@@ -198,6 +199,6 @@ The Flux daemon synchronizes these resources from git to the cluster,
 and the OpenFaaS Operator creates for each function a Kubernetes deployment and a ClusterIP service as 
 specified in the resources.
 
-![functions](docs/screens/flux-openfaas.png)
+![functions](docs/screens/flux-openfaas-operator.png)
 
 You'll use a chart to bundle multiple functions and manage the install and upgrade process.
