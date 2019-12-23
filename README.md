@@ -1,4 +1,4 @@
-# OpenFaaS GitOps workflow with FluxCD
+# OpenFaaS GitOps workflow with Flux and Helm v3
 
 This is a step-by-step guide on how to set up a [GitOps](https://www.weave.works/blog/kubernetes-anti-patterns-let-s-do-gitops-not-ciops)
 workflow for OpenFaaS with Flux CD and its Helm Operator.
@@ -9,7 +9,7 @@ instead of `kubectl apply/delete` or `helm install/upgrade`.
 [OpenFaaS](https://www.openfaas.com/) is an open source faction-as-a-service platform for Kubernetes.
 With OpenFaaS you can package any container or binary as a serverless function - from Node.js to Golang to C# on Linux or Windows. 
 
-[Flux](https://fluxcd.io) is a GitOps Operator for Kubernetes that keeps your cluster state is sync with a Git repository.
+[Flux](https://fluxcd.io) is a GitOps operator for Kubernetes that keeps your cluster state is sync with a Git repository.
 Because Flux is pull based and also runs inside Kubernetes, you don't have to expose the cluster
 credentials outside your production environment.
 Once you enable Flux on your cluster any changes in your production environment are done via
@@ -78,10 +78,7 @@ Install Flux Helm Operator with ***Helm v3*** support:
 helm upgrade -i helm-operator fluxcd/helm-operator --wait \
 --namespace fluxcd \
 --set git.ssh.secretName=flux-git-deploy \
---set extraEnvs[0].name=HELM_VERSION \
---set extraEnvs[0].value=v3 \
---set image.repository=fluxcd/helm-operator-prerelease \
---set image.tag=master-df100c55
+--set helm.versions=v3
 ```
 
 ### Setup Git sync
@@ -104,13 +101,6 @@ Check the OpenFaaS deployment status:
 
 ```
 watch kubectl -n openfaas get helmrelease openfaas
-```
-
-Retrieve the OpenFaaS credentials with:
-
-```sh
-PASSWORD=$(kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode) && \
-echo "OpenFaaS admin password: $PASSWORD"
 ```
 
 ### Manage Helm releases with Flux
@@ -192,6 +182,21 @@ Check that Helm Operator has upgraded the release and that the queue worker was 
 watch kubectl -n openfaas get pods
 ```
 
+Retrieve the OpenFaaS credentials with:
+
+```sh
+PASSWORD=$(kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode) && \
+echo "OpenFaaS admin password: $PASSWORD"
+```
+
+Find the OpenFaaS gateway load balancer address with:
+
+```sh
+kubectl -n openfaas get svc gateway-external -o wide
+```
+
+Navigate to the gateway address in your browser and login with the `admin` user and the password retrieved earlier.
+
 ### Manage OpenFaaS functions with Flux
 
 An OpenFaaS function is described through a Kubernetes custom resource named `function`.
@@ -201,4 +206,64 @@ specified in the resources.
 
 ![functions](docs/screens/flux-openfaas-operator.png)
 
-You'll use a chart to bundle multiple functions and manage the install and upgrade process.
+You'll use a Helm chart stored in git to bundle multiple functions and manage the install and upgrade process.
+
+The functions chart contains two function manifests, certinfo and podinfo:
+
+```
+./functions/
+├── Chart.yaml
+├── templates
+│   ├── NOTES.txt
+│   ├── _helpers.tpl
+│   ├── certinfo.yaml
+│   └── podinfo.yaml
+└── values.yaml
+```
+
+You can add. modify or remove functions in the `functions/templates` dir and Flux Helm Operator will create, update or 
+delete functions in your cluster according to the changes pushed to the master branch.
+
+Install the chart by setting `fluxcd.io/ignore: "false"` (replace `stefanprodan` with your GitHub username): 
+
+```sh
+cat << EOF | tee releases/functions.yaml
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: functions
+  namespace: openfaas-fn
+  annotations:
+    fluxcd.io/ignore: "false"
+spec:
+  releaseName: functions
+  chart:
+    git: git@github.com:stefanprodan/openfaas-flux
+    ref: master
+    path: functions
+EOF
+```
+
+The above manifest instructs Helm Operator to clone the git repository using Flux SSH key
+and install or upgrade the `functions` chart in the openfaas-fn namespace.
+
+Apply changes via git:
+
+```sh
+git add -A && \
+git commit -m "install functions" && \
+git push origin master && \
+fluxctl sync --k8s-fwd-ns fluxcd
+```
+
+List the installed functions with:
+
+```sh
+kubectl -n openfaas-fn get functions
+```
+
+Invoke the certinfo function with:
+
+```sh
+curl -d "openfaas.com" http://<GATEWAY_ADDRESS>/function/certinfo
+```
