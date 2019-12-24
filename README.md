@@ -265,7 +265,7 @@ kubectl -n openfaas-fn get functions
 Invoke the certinfo function with:
 
 ```sh
-curl -d "openfaas.com" http://<GATEWAY_ADDRESS>/function/certinfo
+curl -d "openfaas.com" http://<GATEWAY_ADDRESS>:8080/function/certinfo
 ```
 
 ### Automate OpenFaaS functions updates
