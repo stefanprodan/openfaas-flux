@@ -214,8 +214,6 @@ The functions chart contains two function manifests, certinfo and podinfo:
 ./functions/
 ├── Chart.yaml
 ├── templates
-│   ├── NOTES.txt
-│   ├── _helpers.tpl
 │   ├── certinfo.yaml
 │   └── podinfo.yaml
 └── values.yaml
@@ -266,4 +264,58 @@ Invoke the certinfo function with:
 
 ```sh
 curl -d "openfaas.com" http://<GATEWAY_ADDRESS>/function/certinfo
+```
+
+### Automate OpenFaaS functions updates
+
+Flux can be used to automate container image updates in your cluster.
+Flux periodically scans the pods running in your cluster and builds a list of all container images.
+Using the image pull secrets, it connects to the container registries,
+pulls the images metadata and stores the image tag list in memcached.
+
+![functions](docs/screens/flux-image-updates.png)
+
+You can enable the automate image tag updates by annotating your HelmReleases objects.
+You can also control what tags should be considered for an update by using glob, regex or semantic version expressions.
+
+Edit the functions release and add container image update policies for the OpenFaaS functions
+(replace `stefanprodan` with your GitHub username): 
+
+```sh
+cat << EOF | tee releases/functions.yaml
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: functions
+  namespace: openfaas-fn
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/certinfo: semver:~1.0
+    filter.fluxcd.io/podinfo: semver:~3.1
+spec:
+  releaseName: functions
+  chart:
+    git: git@github.com:stefanprodan/openfaas-flux
+    ref: master
+    path: functions
+  values:
+    certinfo:
+      image: stefanprodan/certinfo:1.0.0
+    podinfo:
+      image: stefanprodan/podinfo:3.1.0
+EOF
+```
+
+The above annotations tell Flux to update the Helm release `values.<function>.image` 
+every time a new image is pushed to Docker Hub with a tag that matches the semver filter.
+Note that Flux only works with immutable image tags (`:latest` is not supported).
+Every image tag must be unique, for this you can use the Git commit SHA or semver when tagging images.
+
+Apply the update policies via git:
+
+```sh
+git add -A && \
+git commit -m "enable functions updates" && \
+git push origin master && \
+fluxctl sync --k8s-fwd-ns fluxcd
 ```
