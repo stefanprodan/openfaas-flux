@@ -1,0 +1,11 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  releaseName: cert-manager
+  chart:
+    git: https://github.com/jetstack/cert-manager
+    ref: release-0.12
+    path: deploy/charts/cert-manager
