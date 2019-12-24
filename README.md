@@ -194,7 +194,7 @@ Find the OpenFaaS gateway load balancer address with:
 kubectl -n openfaas get svc gateway-external -o wide
 ```
 
-Navigate to the gateway address in your browser and login with the `admin` user and the password retrieved earlier.
+Navigate to the gateway address on port `8080` in your browser and login with the `admin` user and the password retrieved earlier.
 
 ### Manage OpenFaaS functions with Flux
 
@@ -288,6 +288,7 @@ metadata:
   name: functions
   namespace: openfaas-fn
   annotations:
+    fluxcd.io/ignore: "false"
     fluxcd.io/automated: "true"
     filter.fluxcd.io/certinfo: semver:~1.0
     filter.fluxcd.io/podinfo: semver:~3.1
