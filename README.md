@@ -272,7 +272,7 @@ Flux periodically scans the pods running in your cluster and builds a list of al
 Using the image pull secrets, it connects to the container registries,
 pulls the images metadata and stores the image tag list in memcached.
 
-![functions](docs/screens/flux-image-updates.png)
+![Flux automation](docs/screens/flux-image-updates.png)
 
 You can enable the automate image tag updates by annotating your HelmReleases objects.
 You can also control what tags should be considered for an update by using glob, regex or semantic version expressions.
@@ -318,3 +318,7 @@ git commit -m "enable functions updates" && \
 git push origin master && \
 fluxctl sync --k8s-fwd-ns fluxcd
 ```
+
+Once the automation is enabled, Flux will apply the semver filter and update the functions images in git and in the cluster:
+
+![functions update](docs/screens/flux-image-update.png)

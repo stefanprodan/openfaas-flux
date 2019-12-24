@@ -14,5 +14,3 @@ spec:
     serviceType: LoadBalancer
     operator:
       create: true
-    queueWorker:
-      replicas: 2
