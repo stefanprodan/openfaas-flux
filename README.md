@@ -6,8 +6,8 @@ GitOps is a way to do Continuous Delivery, it works by using Git as a source of 
 declarative infrastructure and workloads. In practice this means using `git push`
 instead of `kubectl apply/delete` or `helm install/upgrade`. 
 
-[OpenFaaS](https://www.openfaas.com/) is an open source faction-as-a-service platform for Kubernetes.
-With OpenFaaS you can package any container or binary as a serverless function - from Node.js to Golang to C# on Linux or Windows. 
+[OpenFaaS](https://www.openfaas.com/) is an open source function-as-a-service platform for Kubernetes.
+With OpenFaaS you can package your code or an existing binary in a Docker image to get a highly scalable endpoint with auto-scaling and metrics. 
 
 [Flux](https://fluxcd.io) is a GitOps operator for Kubernetes that keeps your cluster state is sync with a Git repository.
 Because Flux is pull based and also runs inside Kubernetes, you don't have to expose the cluster
@@ -162,6 +162,9 @@ spec:
       replicas: 2
 EOF
 ```
+
+A list of all supported chart values can be found in the
+[faas-netes](https://github.com/openfaas/faas-netes/tree/master/chart/openfaas) repo.
 
 Apply changes via git:
 
@@ -330,3 +333,116 @@ $ curl -s http://<GATEWAY_ADDRESS>:8080/function/podinfo/api/info | grep version
 
 "version": "3.1.5"
 ```
+
+### Developer workflow
+
+You'll be using the OpenFaaS CLI to create functions, build and push them to a container registry.
+
+Install faas-cli and login to your instance:
+
+```sh
+curl -sL https://cli.openfaas.com | sudo sh
+
+echo $PASSWORD | faas-cli login -u admin --password-stdin \
+--gateway http://<GATEWAY_ADDRESS>:8080
+```
+
+Create a function using the Go template (replace `stefanprodan` with your Docker Hub username):
+
+```sh
+faas-cli new myfn --lang go --prefix stefanprodan
+```
+
+Implement your function logic by editing the `myfn/handler.go` file.
+
+Initialize a Git repository for your function and commit your changes:
+
+```sh
+git init
+git add . && git commit -s -m "Init function"
+```
+
+Build the container image by tagging it with the Git branch and commit short SHA:
+
+```sh
+$ faas-cli build --tag branch -f myfn.yml
+
+Image: stefanprodan/myfn:latest-master-eb656a6 built.
+```
+
+Push the image to Docker Hub with:
+
+```sh
+$ faas-cli push --tag branch -f myfn.yml
+
+Pushing myfn [stefanprodan/myfn:latest-master-eb656a6] done.
+```
+
+Generate the function Kubernetes custom resource with:
+
+```sh
+faas-cli generate -n "" --tag branch --yaml myfn.yml > myfn-k8s.yaml
+```
+
+Edit the generated YAML so that Flux can use Helm to control the version and labels:
+
+```sh
+cat << EOF | tee functions/templates/myfn.yaml
+apiVersion: openfaas.com/v1alpha2
+kind: Function
+metadata:
+  name: myfn
+  labels:
+{{ include "functions.labels" . | indent 4 }}
+spec:
+  name: myfn
+  image: {{ .Values.myfn.image }}
+EOF
+```
+
+Add your function container image to the chart values.yaml:
+
+```sh
+cat << EOF | tee functions/values.yaml
+certinfo:
+  image: stefanprodan/certinfo:1.0.0
+podinfo:
+  image: stefanprodan/podinfo:3.1.0
+myfn:
+  image: stefanprodan/myfn:latest-master-eb656a6
+EOF
+```
+
+Add your function to the Helm release and set a Flux filter using a glob expression:
+
+```sh
+cat << EOF | tee releases/functions.yaml
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: functions
+  namespace: openfaas-fn
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/certinfo: semver:~1.0
+    filter.fluxcd.io/podinfo: semver:~3.1
+    filter.fluxcd.io/myfn: glob:latest-master-*
+spec:
+  releaseName: functions
+  chart:
+    git: git@github.com:stefanprodan/openfaas-flux
+    ref: master
+    path: functions
+  values:
+    certinfo:
+      image: stefanprodan/certinfo:1.0.0
+    podinfo:
+      image: stefanprodan/podinfo:3.1.0
+    myfn:
+      image: stefanprodan/myfn:latest-master-eb656a6
+EOF
+```
+
+To automate the whole process you can use the [OpenFaaS GitHub action](https://github.com/LucasRoesler/openfaas-action)
+to run faas-cli build and push on every commit to the master branch.
+Flux will detect master builds and will deploy the new images to your cluster.
