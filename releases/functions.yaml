@@ -17,6 +17,6 @@ spec:
     path: functions
   values:
     certinfo:
-      image: stefanprodan/certinfo:1.0.0
+      image: stefanprodan/certinfo:1.0.1
     podinfo:
       image: stefanprodan/podinfo:3.1.0
