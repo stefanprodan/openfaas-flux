@@ -12,7 +12,7 @@ fi
 
 GH_USER=${1:-stefanprodan}
 GH_REPO=${2:-openfaas-flux}
-GH_BRANCH=${3:-master}
+GH_BRANCH=${3:-test}
 GH_URL="git@github.com:${GH_USER}/${GH_REPO}"
 REPO_ROOT=$(git rev-parse --show-toplevel)
 

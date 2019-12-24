@@ -9,3 +9,15 @@ spec:
     git: https://github.com/jetstack/cert-manager
     ref: release-0.12
     path: deploy/charts/cert-manager
+  values:
+    image:
+      repository: quay.io/jetstack/cert-manager-controller
+      tag: v0.12.0
+    webhook:
+      image:
+        repository: quay.io/jetstack/cert-manager-webhook
+        tag: v0.12.0
+    cainjector:
+      image:
+        repository: quay.io/jetstack/cert-manager-cainjector
+        tag: v0.12.0
