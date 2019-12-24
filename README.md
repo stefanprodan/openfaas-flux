@@ -288,7 +288,6 @@ metadata:
   name: functions
   namespace: openfaas-fn
   annotations:
-    fluxcd.io/ignore: "false"
     fluxcd.io/automated: "true"
     filter.fluxcd.io/certinfo: semver:~1.0
     filter.fluxcd.io/podinfo: semver:~3.1
