@@ -13,3 +13,5 @@ spec:
   labels:
     com.openfaas.scale.min: "1"
     com.openfaas.scale.max: "5"
+  env:
+    PODINFO_PORT: "8080"
