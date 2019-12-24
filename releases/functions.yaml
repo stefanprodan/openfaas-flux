@@ -6,7 +6,7 @@ metadata:
   namespace: openfaas-fn
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
+    fluxcd.io/automated: "true"
     filter.fluxcd.io/certinfo: semver:~1.0
     filter.fluxcd.io/podinfo: semver:~3.1
 spec:
@@ -17,6 +17,6 @@ spec:
     path: functions
   values:
     certinfo:
-      image: stefanprodan/certinfo:1.0.1
+      image: stefanprodan/certinfo:1.0.0
     podinfo:
       image: stefanprodan/podinfo:3.1.0
