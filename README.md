@@ -322,3 +322,11 @@ fluxctl sync --k8s-fwd-ns fluxcd
 Once the automation is enabled, Flux will apply the semver filter and update the functions images in git and in the cluster:
 
 ![functions update](docs/screens/flux-image-update.png)
+
+Verify that podinfo version has been updated:
+
+```
+$ curl -s http://<GATEWAY_ADDRESS>:8080/function/podinfo/api/info | grep version
+
+"version": "3.1.5"
+```
