@@ -38,7 +38,7 @@ helm upgrade -i helm-operator fluxcd/helm-operator --wait \
 --set helm.versions=v3
 
 echo ""
-echo "Configure GitHub deploy key for $REPO_URL with write access:"
+echo "Configure GitHub deploy key for $GH_URL with write access:"
 kubectl -n fluxcd logs deployment/flux | grep identity.pub | cut -d '"' -f2
 
 

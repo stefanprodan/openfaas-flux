@@ -155,7 +155,6 @@ spec:
     version: 5.4.0
   values:
     generateBasicAuth: true
-    exposeServices: false
     serviceType: LoadBalancer
     operator:
       create: true
