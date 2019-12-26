@@ -13,7 +13,7 @@ spec:
   releaseName: functions
   chart:
     git: git@github.com:stefanprodan/openfaas-flux
-    ref: master
+    ref: test
     path: functions
   values:
     certinfo:

@@ -8,3 +8,5 @@ spec:
   name: certinfo
   image: {{ .Values.certinfo.image }}
   readOnlyRootFilesystem: true
+  secrets:
+    - basic-auth
