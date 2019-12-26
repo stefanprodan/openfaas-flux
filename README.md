@@ -334,6 +334,89 @@ $ curl -s http://<GATEWAY_ADDRESS>:8080/function/podinfo/api/info | grep version
 "version": "3.1.5"
 ```
 
+### Encrypt Kubernetes secrets in git
+
+In order to store secrets safely in a public Git repo you can use the
+[Sealed Secrets controller](https://github.com/bitnami-labs/sealed-secrets)
+and encrypt your Kubernetes Secrets into SealedSecrets.
+The SealedSecret can be decrypted only by the controller running in your cluster.
+
+The Sealed Secrets controller has been installed by Flux in the `fluxcd` namespace,
+the Helm release can be found in `releases/sealed-secrets.yaml`.
+
+Install the kubeseal CLI:
+
+```sh
+brew install kubeseal
+```
+
+At startup, the sealed-secrets controller generates a RSA key and logs the public key.
+Using kubeseal you can save your public key as `pub-cert.pem`,
+the public key can be safely stored in Git, and can be used to encrypt secrets without direct access to the Kubernetes cluster:
+
+```sh
+kubeseal --fetch-cert \
+--controller-namespace=adm \
+--controller-name=sealed-secrets \
+> pub-cert.pem
+```
+
+Generate a Kubernetes secret locally with kubectl:
+
+```bash
+kubectl create secret generic db-credentials \
+--from-literal=user=my-db-user \
+--from-literal=password=my-db-pass \
+--dry-run \
+-o json > db-credentials.json
+```
+
+Encrypt the secret with kubeseal and add it to the functions chart:
+
+```sh
+kubeseal --format=yaml --cert=pub-cert.pem \
+< db-credentials.json > functions/templates/db-credentials.yaml
+```
+
+Edit certinfo and add the secret to the function definition:
+
+```sh
+cat << EOF | tee functions/templates/certinfo.yaml
+apiVersion: openfaas.com/v1alpha2
+kind: Function
+metadata:
+  name: certinfo
+  labels:
+{{ include "functions.labels" . | indent 4 }}
+spec:
+  name: certinfo
+  image: {{ .Values.certinfo.image }}
+  readOnlyRootFilesystem: true
+  secrets:
+    - db-credentials
+EOF
+```
+
+The above configuration instructs the OpenFaaS operator to mount the db-credentials secret as a file inside the function
+container at `/var/openfaas/secrets/`.
+
+Delete the plain text secret and apply changes via git:
+
+```sh
+rm db-credentials.json && \
+git add -A && \
+git commit -m "add db credentials" && \
+git push origin master && \
+fluxctl sync --k8s-fwd-ns fluxcd
+```
+
+Flux will apply the sealed secret on your cluster and sealed-secrets controller will then decrypt it into a
+Kubernetes secret.
+
+![SealedSecrets](https://github.com/fluxcd/helm-operator-get-started/blob/master/diagrams/flux-helm-operator-sealed-secrets.png)
+
+You can read more about secrets management on the OpenFaaS docs [website](https://docs.openfaas.com/reference/secrets/).
+
 ### Developer workflow
 
 You'll be using the OpenFaaS CLI to create functions, build and push them to a container registry.
