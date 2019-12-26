@@ -10,3 +10,5 @@ spec:
   readOnlyRootFilesystem: true
   secrets:
     - basic-auth
+  environment:
+    output: "verbose"

@@ -3,7 +3,6 @@ kind: SealedSecret
 metadata:
   creationTimestamp: null
   name: basic-auth
-  namespace: openfaas-fn
 spec:
   encryptedData:
     password: AgBAXXajj2uDWYutHyNnFPu8Juo+em+VH87vIIiDUiE1npDoUoOc3baiG9t+ZPyQI9my7A1oE+r8EQdKczdNrbfEP1P/rryUjYnkCEIMzxynWyeybNLh7e+oZiq3DWkh5PqKnwsgQMRozfSSXQAdFguTtxtvstG795iFPCctWAwkvjWw/9V/YGxWFSsbY6RElyW9BNqOV3O/WN0tUNnlEoHJv25s9vNLerVQQ6NJRBKOSNSCIG3AiBX7RPIRJiZ9h82ExZf8YD9hyeCiir2mQHzU6ri52DJWowyXyeYuqIHMh9kCOKuziFk2ddWXF+JIeJW9ElQNOgbRjbd1+3aF3qcrURj/fuf9wxMAcUyZleXoPOi5Ro6zlH0vpf6IE4zdsZq4WKuBLhPKB9UYf36uG4W7F1v/ZD3kawR3FrDLCcCsH9jpsVUW2XcWRUHp/N/sIYNH6sgzSwDx9I3Fbi5ygdZFMB09KlzJ+VeA9oEvs5NZCukVtQK6/hBpf8CWSBvuN/sgg5pOOz2gqnkRA7ySlzokaMdnIwDFhT7AUfH2v5UORob8IzGePB8yl8B9a2MEjE2zTG2V66QaID10jFArY+dWOUefImLvKlhBnvjhRCGSzMhb2+ZXK5c/k/zy8aYu3BDJF9Ge58pMBhdY8Mb8aWuyI3jEVOL3lHUs5JIg6FVXKv9tzuP8Xfepf7/km66H2TMzMix2SQ==
@@ -12,6 +11,5 @@ spec:
     metadata:
       creationTimestamp: null
       name: basic-auth
-      namespace: openfaas-fn
 status: {}
 
