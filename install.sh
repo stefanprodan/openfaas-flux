@@ -30,7 +30,7 @@ helm upgrade -i flux fluxcd/flux --wait \
 --set git.url=${GH_URL} \
 --set git.branch=${GH_BRANCH}
 
-kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/flux-helm-release-crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/chart/helm-operator/crds/helmrelease.yaml
 
 helm upgrade -i helm-operator fluxcd/helm-operator --wait \
 --namespace fluxcd \
